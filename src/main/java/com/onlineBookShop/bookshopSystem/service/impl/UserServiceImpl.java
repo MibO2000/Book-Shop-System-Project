@@ -123,7 +123,7 @@ public class UserServiceImpl implements UserService {
             UserRepresentation userRepresentation = keycloakService.deleteUser(user);
             if (userRepresentation != null){
                 userRepository.delete(user);
-                if (eWalletInfoService.deleteUserInfo(userId).isStatus()){
+                if (eWalletInfoService.deleteUserInfo(userId)){
                     return new BaseResponse("User Deleted",user,true,LocalDateTime.now());
                 }
                 return new BaseResponse("Fail to delete eWalletInfo",user,false,LocalDateTime.now());

@@ -4,6 +4,7 @@ import com.onlineBookShop.bookshopSystem.config.AppConfig;
 import com.onlineBookShop.bookshopSystem.eWallet.entity.EWalletInfo;
 import com.onlineBookShop.bookshopSystem.eWallet.mapper.EWalletInfoMapper;
 import com.onlineBookShop.bookshopSystem.eWallet.service.EWalletInfoService;
+import com.onlineBookShop.bookshopSystem.payLoad.request.BalanceUpdateRequest;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;
 import com.onlineBookShop.bookshopSystem.repository.UserRepository;
 import com.onlineBookShop.bookshopSystem.service.KeycloakService;
@@ -83,35 +84,37 @@ public class EWalletInfoServiceImpl implements EWalletInfoService {
     }
 
     @Override
-    public BaseResponse updateUserBalanceInfo(String accountName, BigDecimal balance) {
+    public BaseResponse updateUserBalanceInfo(BalanceUpdateRequest balanceUpdateRequest) {
+        String accountName = balanceUpdateRequest.getName();
+        BigDecimal balance = balanceUpdateRequest.getBalance();
+        Long ownerId = balanceUpdateRequest.getId();;
         if (accountName == null || balance == null){
             return new BaseResponse("Need to fill info",null,false,LocalDateTime.now());
         }
-        if (!getUserInfo().isStatus()){
-            return new BaseResponse("The user does not exists",null,false,LocalDateTime.now());
-        }
         try{
-            jdbcTemplate.update(appConfig.getEWalletInfo().getInfoUpdateQuery(),balance,accountName);
-            return new BaseResponse("The user info updated",getUserInfo(),true,LocalDateTime.now());
+            if(jdbcTemplate.update(appConfig.getEWalletInfo().getInfoUpdateQuery(),balance,accountName,ownerId)>0){
+                return new BaseResponse("The user info updated",accountName,true,LocalDateTime.now());
+            }
+            return new BaseResponse("The user info not updated",accountName,false,LocalDateTime.now());
         }catch(Exception e){
             return new BaseResponse("Fail to update user",null,false,LocalDateTime.now());
         }
     }
 
     @Override
-    public BaseResponse deleteUserInfo(Long ownerId) {
+    public Boolean deleteUserInfo(Long ownerId) {
         if (ownerId == null){
-            return new BaseResponse("Need to fill info",null,false,LocalDateTime.now());
+            return false;
         }
         EWalletInfo eWalletInfo = jdbcTemplate.queryForObject(appConfig.getEWalletInfo().getInfoQuery(),new Object[]{ownerId},mapper);
         if (eWalletInfo==null){
-            return new BaseResponse("The user does not exists",null,false,LocalDateTime.now());
+            return false;
         }
         try{
             jdbcTemplate.update(appConfig.getEWalletInfo().getInfoDeleteQuery(),ownerId);
-            return new BaseResponse("User info deleted",eWalletInfo,true,LocalDateTime.now());
+            return true;
         }catch(Exception e){
-            return new BaseResponse("Fail to delete user info",null,false,LocalDateTime.now());
+            return true;
         }
     }
 
@@ -134,8 +137,10 @@ public class EWalletInfoServiceImpl implements EWalletInfoService {
     public Boolean updateBalanceAfterBuying(BigDecimal balance) {
         Long id = getUserId();
         try{
-            jdbcTemplate.update(appConfig.getEWalletInfo().getUpdateBalanceQuery(),balance,id);
-            return true;
+            if(jdbcTemplate.update(appConfig.getEWalletInfo().getUpdateBalanceQuery(),balance,id)>0){
+                return true;
+            }
+            return false;
         }catch (Exception e){
             log.error("Error: "+e);
             return false;
@@ -145,8 +150,10 @@ public class EWalletInfoServiceImpl implements EWalletInfoService {
     public Boolean updateBalanceAfterDeleting(BigDecimal balance){
         Long id = getUserId();
         try{
-            jdbcTemplate.update(appConfig.getEWalletInfo().getAddBalanceQuery(),balance,id);
-            return true;
+            if(jdbcTemplate.update(appConfig.getEWalletInfo().getAddBalanceQuery(),balance,id)>0){
+                return true;
+            }
+            return false;
         }catch (Exception e){
             log.error("Error: "+e);
             return false;

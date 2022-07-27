@@ -31,7 +31,6 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
         keycloakAuthenticationProvider.setGrantedAuthoritiesMapper(new SimpleAuthorityMapper());
         auth.authenticationProvider(keycloakAuthenticationProvider);
     }
-
     /**
      * Defines the session authentication strategy.
      */
@@ -40,7 +39,6 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
         return new RegisterSessionAuthenticationStrategy(new SessionRegistryImpl());
     }
-
 
     @Bean
     protected KeycloakConfigResolver keycloakConfigResolver() {

@@ -9,8 +9,9 @@ import java.util.List;
 public interface EWalletHistoryService {
     BaseResponse getAllEWalletHistory();
     BaseResponse getEachEWalletHistory();
-    Boolean deleteHistory(LocalDate date, Long bookId);
+    Boolean deleteHistory(Long orderId);
     Boolean createHistory(EWalletHistory eWalletHistory);
     List<EWalletHistory> getHistoryByDate(LocalDate date);
-    EWalletHistory getHistoryByBookID(Long bookId);
+    EWalletHistory getHistoryByBookID(Long orderId);
+    BaseResponse getSpecificEWalletHistory(Long id);
 }

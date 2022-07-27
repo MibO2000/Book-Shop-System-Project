@@ -65,23 +65,22 @@ public class EWalletHistoryServiceImpl implements EWalletHistoryService {
     public BaseResponse getEachEWalletHistory() {
         try{
             Long id = userService.getUserId();
-            return new BaseResponse("Here is the data",
-                    jdbcTemplate.queryForObject(appConfig.getEWalletHistory().getHistoryQuery(),new Object[]{id},eWalletHistoryMapper),
-                    true,LocalDateTime.now());
+            List<EWalletHistory> eWalletHistory = jdbcTemplate.query(appConfig.getEWalletHistory().getHistoryQuery(),new Object[]{id},eWalletHistoryMapper);
+            return (eWalletHistory==null)?
+                    new BaseResponse("You have not buy book yet",null,false, LocalDateTime.now()):
+                    new BaseResponse("Here is the data",eWalletHistory, true,LocalDateTime.now());
         }catch (Exception e){
             return new BaseResponse("Fail to get User's wallet info",null,false, LocalDateTime.now());
         }
     }
 
     @Override
-    public Boolean deleteHistory(LocalDate date, Long bookId) {
-        if (date == null || bookId == null){
-            return false;
-        }
-        Long id = userService.getUserId();
+    public Boolean deleteHistory(Long orderId) {
         try{
-            int result = jdbcTemplate.update(appConfig.getEWalletHistory().getHistoryDeleteQuery(), id, bookId, date);
-            return result != -1;
+            log.info("OrderId: {}",orderId);
+            int result = jdbcTemplate.update(appConfig.getEWalletHistory().getHistoryDeleteQuery(), orderId);
+            log.info("Result: {}",result);
+            return result > 0;
         }catch (Exception e){
             log.error("Error: "+e);
             return false;
@@ -120,13 +119,26 @@ public class EWalletHistoryServiceImpl implements EWalletHistoryService {
         }
     }
     @Override
-    public EWalletHistory getHistoryByBookID(Long bookId){
+    public EWalletHistory getHistoryByBookID(Long id){
         try{
             return jdbcTemplate.queryForObject
-                    (appConfig.getEWalletHistory().getHistoryQueryById(),new Object[]{bookId},eWalletHistoryMapper);
+                    (appConfig.getEWalletHistory().getHistoryQueryById(),new Object[]{id},eWalletHistoryMapper);
         }catch(Exception e){
             log.error("Error: "+e);
             return null;
+        }
+    }
+
+    @Override
+    public BaseResponse getSpecificEWalletHistory(Long id) {
+        try{
+            List<EWalletHistory> eWalletHistories = jdbcTemplate.query(appConfig.getEWalletHistory().getHistoryQuery(),new Object[]{id},eWalletHistoryMapper);
+            if (eWalletHistories == null){
+                return new BaseResponse("This user have no book history",null,false, LocalDateTime.now());
+            }
+            return new BaseResponse("Here is the data",eWalletHistories, true,LocalDateTime.now());
+        }catch (Exception e){
+            return new BaseResponse("Fail to get User's wallet info",null,false, LocalDateTime.now());
         }
     }
 

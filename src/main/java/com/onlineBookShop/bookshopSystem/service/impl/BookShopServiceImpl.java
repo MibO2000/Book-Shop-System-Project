@@ -4,6 +4,7 @@ import com.onlineBookShop.bookshopSystem.eWallet.entity.EWalletHistory;
 import com.onlineBookShop.bookshopSystem.eWallet.service.EWalletHistoryService;
 import com.onlineBookShop.bookshopSystem.eWallet.service.EWalletInfoService;
 import com.onlineBookShop.bookshopSystem.entity.Book;
+import com.onlineBookShop.bookshopSystem.payLoad.request.OrderDeleteRequest;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;
 import com.onlineBookShop.bookshopSystem.service.BookService;
 import com.onlineBookShop.bookshopSystem.service.BookShopService;
@@ -75,33 +76,40 @@ public class BookShopServiceImpl implements BookShopService {
             if(!bookService.updateBookCount(count - 1, bookId)){
                 return new BaseResponse("Book Count not updated",null,false,LocalDateTime.now());
             }
-            if(!eWalletInfoService.updateBalanceAfterBuying(price)){
+            BigDecimal newBalance = balance.subtract(price);
+            if(!eWalletInfoService.updateBalanceAfterBuying(newBalance)){
                 return new BaseResponse("Fail to update balance",null,false,LocalDateTime.now());
             }
             boolean result = eWalletHistoryService.createHistory(new EWalletHistory(
                     userService.getUserId(), bookId, balance,
-                    balance.subtract(price), LocalTime.now(), LocalDate.now()
+                    newBalance, LocalTime.now(), LocalDate.now()
             ));
             if (!result){
                 return new BaseResponse("Fail to get into history table",null,false,LocalDateTime.now());
             }
-            return new BaseResponse("Buy successful", eWalletHistoryService.getHistoryByBookID(bookId),true,LocalDateTime.now());
+            return new BaseResponse("Buy successful", eWalletHistoryService.getEachEWalletHistory(),true,LocalDateTime.now());
         }catch (Exception e){
             return new BaseResponse("Fail to buy book",null,false,LocalDateTime.now());
         }
     }
 
     @Override
-    public BaseResponse deleteOrder(Long bookId) {
-        EWalletHistory eWalletHistory = eWalletHistoryService.getHistoryByBookID(bookId);
+    public BaseResponse deleteOrder(OrderDeleteRequest orderDeleteRequest) {
+        Long bookId = orderDeleteRequest.getBookId();
+        Long orderId = orderDeleteRequest.getOrderId();
+        EWalletHistory eWalletHistory = eWalletHistoryService.getHistoryByBookID(orderId);
+        if (eWalletHistory==null){
+            return new BaseResponse("The order not exists",String.format("orderID: %d\nbookID: %d",orderId,bookId),false,LocalDateTime.now());
+        }
         LocalDate buyDate = eWalletHistory.getBuyDate();
+        BigDecimal balance = eWalletInfoService.getBalance();
         int difference = Period.between(buyDate,LocalDate.now()).getDays();
         if (difference > 1){
             return new BaseResponse("Cannot cancel the order after 1 day",null,false,LocalDateTime.now());
         }
-
-        if(eWalletHistoryService.deleteHistory(buyDate, bookId)){
-            if(eWalletInfoService.updateBalanceAfterDeleting(eWalletHistory.getBeforeBalance().subtract(eWalletHistory.getAfterBalance()))) {
+        BigDecimal newBalance = balance.add(eWalletHistory.getBeforeBalance().subtract(eWalletHistory.getAfterBalance()));
+        if(eWalletHistoryService.deleteHistory(orderId)){
+            if(eWalletInfoService.updateBalanceAfterDeleting(newBalance)) {
                 return new BaseResponse("Order deleted", eWalletHistory, true, LocalDateTime.now());
             }
             log.error("Fail to add money");

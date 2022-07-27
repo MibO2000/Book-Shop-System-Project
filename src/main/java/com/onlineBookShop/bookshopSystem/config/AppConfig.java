@@ -64,6 +64,7 @@ public class AppConfig {
     }
     public static class EWalletInfo{
         private String infoQuery;
+        private String infoQueryByName;
         private String infoInsertQuery;
         private String infoUpdateQuery;
         private String updateBalanceQuery;
@@ -71,6 +72,14 @@ public class AppConfig {
         private String infoDeleteQuery;
         private String infoAllQuery;
         private String addBalanceQuery;
+
+        public String getInfoQueryByName() {
+            return infoQueryByName;
+        }
+
+        public void setInfoQueryByName(String infoQueryByName) {
+            this.infoQueryByName = infoQueryByName;
+        }
 
         public String getAddBalanceQuery() {
             return addBalanceQuery;

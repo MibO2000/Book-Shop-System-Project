@@ -1,5 +1,6 @@
 package com.onlineBookShop.bookshopSystem.controller;
 
+import com.onlineBookShop.bookshopSystem.payLoad.request.OrderDeleteRequest;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;
 import com.onlineBookShop.bookshopSystem.service.BookShopService;
 import lombok.extern.slf4j.Slf4j;
@@ -38,10 +39,10 @@ public class BookBuyingController {
         return bookShopService.buyBook(id);
     }
 
-    @DeleteMapping("/order/{id}")
+    @DeleteMapping("/order/delete")
     @RolesAllowed({"admin","user"})
-    public BaseResponse deleteOrder(@PathVariable Long id){
-        return bookShopService.deleteOrder(id);
+    public BaseResponse deleteOrder(@RequestBody OrderDeleteRequest orderDeleteRequest){
+        return bookShopService.deleteOrder(orderDeleteRequest);
     }
 
 }
