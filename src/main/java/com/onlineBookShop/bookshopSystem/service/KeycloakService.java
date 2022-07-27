@@ -6,4 +6,5 @@ import org.keycloak.representations.idm.UserRepresentation;
 public interface KeycloakService {
     UserRepresentation createUser(User user);
     String getUserKeycloakId();
+    UserRepresentation deleteUser(User user);
 }

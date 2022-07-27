@@ -3,11 +3,13 @@ package com.onlineBookShop.bookshopSystem.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 
 @Configuration
 @ConfigurationProperties(prefix = "config")
 @Data
+@EnableScheduling
 public class AppConfig {
     String fromMail;
     Datasource eWalletDatasource;
@@ -142,6 +144,15 @@ public class AppConfig {
         private String historyQueryByDate;
         private String historyQueryForMail;
         private String historyQueryById;
+        private String historyQueryByOwnerIdToDelete;
+
+        public String getHistoryQueryByOwnerIdToDelete() {
+            return historyQueryByOwnerIdToDelete;
+        }
+
+        public void setHistoryQueryByOwnerIdToDelete(String historyQueryByOwnerIdToDelete) {
+            this.historyQueryByOwnerIdToDelete = historyQueryByOwnerIdToDelete;
+        }
 
         public String getHistoryQueryForMail() {
             return historyQueryForMail;

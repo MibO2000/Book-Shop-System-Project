@@ -27,9 +27,12 @@ public class UserController {
     }
     @GetMapping("/{id}")
     @RolesAllowed("admin")
-    public BaseResponse getUserById(@PathVariable(required = false)Long id){
+    public BaseResponse getUserById(@PathVariable Long id){
         try{
-            return new BaseResponse("Here is the user with id: "+id,userService.getUserById(id),true,LocalDateTime.now());
+            if (userService.findUserById(id)){
+                return new BaseResponse("Here is the user with id: "+id,userService.getUserById(id),true,LocalDateTime.now());
+            }
+            return new BaseResponse("No user with that id: "+id,null,false,LocalDateTime.now());
         }catch (Exception e){
             return new BaseResponse("Fail to get User with id:"+id,null,false, LocalDateTime.now());
         }
@@ -39,5 +42,10 @@ public class UserController {
     @RolesAllowed("admin")
     public BaseResponse createNewUser(@RequestBody UserCreationRequest userCreationRequest){
         return userService.createNewUser(userCreationRequest);
+    }
+    @DeleteMapping("/{userId}")
+    @RolesAllowed("admin")
+    public BaseResponse deleteUser(@PathVariable Long userId){
+        return userService.deleteUser(userId);
     }
 }

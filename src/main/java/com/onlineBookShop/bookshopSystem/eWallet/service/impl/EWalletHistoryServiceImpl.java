@@ -129,32 +129,38 @@ public class EWalletHistoryServiceImpl implements EWalletHistoryService {
             return null;
         }
     }
-    @Scheduled(cron = "0 0 8 * * ?")
+
+    @Scheduled(cron = "04 20 9 * * ?")
     public void mailToUser(){
         try{
             List<EWalletHistory> eWalletHistoryList = jdbcTemplate.query(
                     appConfig.getEWalletHistory().getHistoryQueryForMail(),new Object[]{LocalDate.now().minusDays(2)},eWalletHistoryMapper
             );
+            log.info("List: "+eWalletHistoryList);
             if (eWalletHistoryList.isEmpty()){
                 return;
             }
             for (EWalletHistory eWalletHistory:eWalletHistoryList){
-                Book book = bookService.findBookById(eWalletHistory.getBookId());
-                User user = userService.getUserById(userService.getUserId());
-                MimeMessage msg = javaMailSender.createMimeMessage();
-                MimeMessageHelper helper = new MimeMessageHelper(msg,true);
-                SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-                simpleMailMessage.setFrom(appConfig.getFromMail());
-                simpleMailMessage.setTo(user.getEmail());
-                simpleMailMessage.setSubject("Notice for the book delivery");
-                String text = String.format("From MIB book store,\nBook, %s, will deliver today",book.getName());
-                simpleMailMessage.setText(text);
-                helper.setFrom(Objects.requireNonNull(simpleMailMessage.getFrom()));
-                helper.setTo(Objects.requireNonNull(simpleMailMessage.getTo()));
-                helper.setSubject(Objects.requireNonNull(simpleMailMessage.getSubject()));
-                helper.setText(Objects.requireNonNull(simpleMailMessage.getText()));
-                javaMailSender.send(msg);
-                log.info("Sending mail.....");
+                try{
+                    Book book = bookService.findBookById(eWalletHistory.getBookId());
+                    User user = userService.getUserById(eWalletHistory.getOwnerId());
+                    MimeMessage msg = javaMailSender.createMimeMessage();
+                    MimeMessageHelper helper = new MimeMessageHelper(msg,true);
+                    SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+                    simpleMailMessage.setFrom(appConfig.getFromMail());
+                    simpleMailMessage.setTo(user.getEmail());
+                    simpleMailMessage.setSubject("Notice for the book delivery");
+                    String text = String.format("From MIB book store,\nBook, %s, will deliver today",book.getName());
+                    simpleMailMessage.setText(text);
+                    helper.setFrom(Objects.requireNonNull(simpleMailMessage.getFrom()));
+                    helper.setTo(Objects.requireNonNull(simpleMailMessage.getTo()));
+                    helper.setSubject(Objects.requireNonNull(simpleMailMessage.getSubject()));
+                    helper.setText(Objects.requireNonNull(simpleMailMessage.getText()));
+                    javaMailSender.send(msg);
+                    log.info("Sending mail.....");
+                }catch (Exception e){
+                    log.error("Error sending User with history{}, error: {}",eWalletHistory,e.getLocalizedMessage());
+                }
             }
         }catch (Exception e){
             log.error("Error: "+e);

@@ -1,5 +1,6 @@
 package com.onlineBookShop.bookshopSystem.service.impl;
 
+import com.onlineBookShop.bookshopSystem.entity.Author;
 import com.onlineBookShop.bookshopSystem.entity.Book;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;
 import com.onlineBookShop.bookshopSystem.repository.BookRepository;
@@ -66,8 +67,14 @@ public class BookServiceImpl implements BookService {
     @Override
     public BaseResponse getBooksByAuthorId(String name) {
         try{
-            List<Book> bookList = bookRepository.findBookListByAuthorId(name);
-            if (bookList.isEmpty()){return new BaseResponse("Here is the list", bookRepository.findAll(), true,LocalDateTime.now());}
+            Author author = authorService.getAuthorByName(name);
+            if (author == null){
+                return new BaseResponse("Author not exists",null,false,LocalDateTime.now());
+            }
+            List<Book> bookList = bookRepository.findBooksByAuthorId(author.getId());
+            if (bookList.isEmpty()){
+                return new BaseResponse("The author has no book", null, true,LocalDateTime.now());
+            }
             return new BaseResponse("Here is the list",bookList,true,LocalDateTime.now());
         }catch (Exception e){
             return new BaseResponse("Fail to get books by author id",null,false,LocalDateTime.now());

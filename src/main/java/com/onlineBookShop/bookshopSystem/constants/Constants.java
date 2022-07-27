@@ -2,7 +2,6 @@ package com.onlineBookShop.bookshopSystem.constants;
 
 public class Constants {
     //book repo
-    public static final String FIND_BY_AUTHOR = "SELECT b.* FROM Book AS b, Author AS a WHERE b.author_id = a.id AND a.name=?1 ORDER BY b.id ASC";
     public static final String SORTING_BOOKS_ASC = "SELECT * FROM Book AS b ORDER BY b.id ASC";
     public static final String SORTING_BOOKS_DESC = "SELECT * FROM Book AS b ORDER BY b.id DESC";
     public static final String ID_FOR_DELETE = "SELECT b.id FROM Book AS b, Author AS a WHERE b.author_id = a.id AND a.id=?1";
@@ -10,10 +9,8 @@ public class Constants {
     public static final String GET_PRICE = "SELECT b.price FROM Book AS b WHERE b.id = ?1";
 
     //author repo
-    public static final String FIND_AUTHOR_BY_ID = "SELECT a.name FROM Author AS a WHERE a.id = ?1";
     public static final String SORTING_AUTHORS_ASC = "SELECT * FROM Author AS a ORDER BY a.id ASC";
     public static final String SORTING_AUTHORS_DESC = "SELECT * FROM Author AS a ORDER BY a.id DESC";
-    public static final String GET_ALL_AUTHORS = "SELECT * FROM Author";
     public static final String GET_AUTHOR_BY_ID = "SELECT * FROM Author WHERE id=?1";
 
 

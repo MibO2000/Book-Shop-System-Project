@@ -53,7 +53,6 @@ public class KeycloakServiceImpl implements KeycloakService {
     public void addRealmRoleToUser(String userName, String role_name) {
         log.info("AddRealmRoleToUser : {}", userName + " " + role_name);
         String client_id = keycloak.realm(getRealm()).clients().findByClientId(getClientId()).get(0).getId();
-
         String userId = keycloak.realm(getRealm()).users().search(userName).get(0).getId();
         UserResource user = keycloak.realm(getRealm()).users().get(userId);
         List<RoleRepresentation> roleToAdd = new LinkedList<>();
@@ -96,5 +95,16 @@ public class KeycloakServiceImpl implements KeycloakService {
     @Override
     public String getUserKeycloakId() {
         return httpServletRequest.getUserPrincipal().getName();
+    }
+    @Override
+    public UserRepresentation deleteUser(User user) {
+        List<UserRepresentation> userRepresentations= keycloak.realm(getRealm()).users().search(user.getName());
+        for (UserRepresentation userRep : userRepresentations) {
+            if (user.getName().equals(userRep.getUsername())) {
+                keycloak.realm(getRealm()).users().delete(userRep.getId());
+                return  userRep;
+            }
+        }
+        return null;
     }
 }
