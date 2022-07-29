@@ -20,6 +20,7 @@ public class BookController {
     }
 
     @GetMapping("")
+    @CrossOrigin
     @RolesAllowed({"user","admin"})
     BaseResponse getBooks(@RequestParam(defaultValue = "1")Integer pageNo,
                           @RequestParam(defaultValue = "10")Integer pageSize,
@@ -28,36 +29,42 @@ public class BookController {
     }
 
     @GetMapping("/name/")
+    @CrossOrigin
     @RolesAllowed({"user","admin"})
     BaseResponse getBookByID(@RequestParam String name){
         return bookService.getBookByName(name);
     }
 
     @PostMapping("")
+    @CrossOrigin
     @RolesAllowed("admin")
     BaseResponse uploadBook(@RequestBody Book book){
         return bookService.createBook(book);
     }
 
     @GetMapping("/author")
+    @CrossOrigin
     @RolesAllowed({"user","admin"})
     BaseResponse getBooksByAuthorName(@RequestParam String name){
         return bookService.getBooksByAuthorName(name);
     }
 
     @GetMapping("/method")
+    @CrossOrigin
     @RolesAllowed({"user","admin"})
     public BaseResponse sortingBookList(@RequestParam(name = "method",required = false) Integer method){
         return bookService.sortingBookList(method);
     }
 
     @PutMapping("/{id}")
+    @CrossOrigin
     @RolesAllowed("admin")
     public BaseResponse updateBook(@PathVariable Long id, @RequestBody Book book){
         return bookService.updateBook(id, book);
     }
 
     @DeleteMapping("/{id}")
+    @CrossOrigin
     @RolesAllowed("admin")
     public BaseResponse deleteBook(@PathVariable Long id) { return bookService.deleteBook(id);}
 

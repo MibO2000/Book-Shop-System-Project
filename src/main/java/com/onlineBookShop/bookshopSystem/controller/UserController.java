@@ -19,6 +19,7 @@ public class UserController {
         this.userService = userService;
     }
     @GetMapping("")
+    @CrossOrigin
     @RolesAllowed("admin")
     public BaseResponse getAllUsers(@RequestParam(defaultValue = "1") Integer pageNo,
                                     @RequestParam(defaultValue = "10") Integer pageSize,
@@ -26,16 +27,19 @@ public class UserController {
         return userService.getAllUsers(pageNo,pageSize,sortBy);
     }
     @GetMapping("/{id}")
+    @CrossOrigin
     @RolesAllowed("admin")
     public BaseResponse getUserById(@PathVariable Long id){
         return userService.findUserById(id);
     }
     @PostMapping()
+    @CrossOrigin
     @RolesAllowed("admin")
     public BaseResponse createNewUser(@RequestBody UserCreationRequest userCreationRequest){
         return userService.createNewUser(userCreationRequest);
     }
     @DeleteMapping("/{userId}")
+    @CrossOrigin
     @RolesAllowed("admin")
     public BaseResponse deleteUser(@PathVariable Long userId){
         return userService.deleteUser(userId);

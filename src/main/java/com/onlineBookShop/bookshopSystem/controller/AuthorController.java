@@ -19,6 +19,7 @@ public class AuthorController {
     }
 
     @GetMapping("")
+    @CrossOrigin
     @RolesAllowed({"user","admin"})
     public BaseResponse getAuthors(@RequestParam(defaultValue = "1")Integer pageNo,
                                    @RequestParam(defaultValue = "10")Integer pageSize,
@@ -26,30 +27,35 @@ public class AuthorController {
         return authorService.getAuthors(pageNo,pageSize,sortBy);
     }
     @GetMapping("/name/")
+    @CrossOrigin
     @RolesAllowed({"user","admin"})
     public BaseResponse getAuthorByName(@RequestParam String name){
         return authorService.findAuthorByName(name);
     }
 
     @PostMapping("")
+    @CrossOrigin
     @RolesAllowed("admin")
     public BaseResponse createAuthor(@RequestBody Author author){
         return authorService.createAuthor(author);
     }
 
     @GetMapping("/method")
+    @CrossOrigin
     @RolesAllowed({"user","admin"})
     public BaseResponse sortingAuthorList(@RequestParam(name = "method",required = false) Integer method){
         return authorService.sortingAuthorList(method);
     }
 
     @PutMapping("/")
+    @CrossOrigin
     @RolesAllowed("admin")
     public BaseResponse updateAuthor(@RequestParam String name, @RequestBody Author author){
         return authorService.updateAuthor(name,author);
     }
 
     @DeleteMapping("/{id}")
+    @CrossOrigin
     @RolesAllowed("admin")
     public BaseResponse deleteAuthor(@PathVariable Long id){ return authorService.deleteAuthor(id); }
 }

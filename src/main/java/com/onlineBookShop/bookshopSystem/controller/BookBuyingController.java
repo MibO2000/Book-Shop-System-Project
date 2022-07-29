@@ -26,24 +26,28 @@ public class BookBuyingController {
     }
 
     @GetMapping("/orderList")
+    @CrossOrigin
     @RolesAllowed({"admin","user"})
     public BaseResponse getOrderList(@RequestParam(required = false)LocalDate date){
         return bookShopService.getOrderList(date);
     }
 
     @GetMapping("/books")
+    @CrossOrigin
     @RolesAllowed({"admin","user"})
     public BaseResponse getBookList(){
         return bookShopService.getBookList();
     }
 
     @PostMapping("/order")
+    @CrossOrigin
     @RolesAllowed("user")
     public BaseResponse buyBook(@RequestBody OrderBuyingRequest order){
         return bookShopService.buyBook(order);
     }
 
     @DeleteMapping("/order")
+    @CrossOrigin
     @RolesAllowed("user")
     public BaseResponse deleteOrder(@RequestBody OrderDeleteRequest orderDeleteRequest){
         return bookShopService.deleteOrder(orderDeleteRequest);
