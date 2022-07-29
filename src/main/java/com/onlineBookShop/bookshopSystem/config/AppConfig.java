@@ -20,7 +20,6 @@ public class AppConfig {
         private String username;
         private String password;
         private String driverClassname;
-        private String driveType;
 
         public String getSourceUrl() {
             return sourceUrl;
@@ -52,14 +51,6 @@ public class AppConfig {
 
         public void setDriverClassname(String driverClassname) {
             this.driverClassname = driverClassname;
-        }
-
-        public String getDriveType() {
-            return driveType;
-        }
-
-        public void setDriveType(String driveType) {
-            this.driveType = driveType;
         }
     }
     public static class EWalletInfo{
