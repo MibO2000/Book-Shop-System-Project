@@ -1,8 +1,6 @@
 package com.onlineBookShop.bookshopSystem.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.redis.core.RedisHash;
 
 import javax.persistence.Entity;
@@ -13,7 +11,8 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -28,11 +27,4 @@ public class BookBuyable implements Serializable {
     private String bookName;
     private String authorName;
     private BigDecimal price;
-
-    public BookBuyable(Long bookId, String bookName, String authorName, BigDecimal price) {
-        this.bookId = bookId;
-        this.bookName = bookName;
-        this.authorName = authorName;
-        this.price = price;
-    }
 }

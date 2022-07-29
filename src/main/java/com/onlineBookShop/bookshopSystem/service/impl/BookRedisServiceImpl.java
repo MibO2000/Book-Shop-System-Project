@@ -35,7 +35,7 @@ public class BookRedisServiceImpl implements BookRedisService {
             List<BookBuyable> bookList = bookRedisRepository.findAll();
             if (bookList.isEmpty()) {
                 List<Book> bookStockList = bookService.findBookStock();
-                Long id = 1l;
+                Long id = 1L;
                 for (Book book : bookStockList) {
                     bookList.add(new BookBuyable(id,
                             book.getId(), book.getName(),

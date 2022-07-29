@@ -11,6 +11,7 @@ public class Constants {
     //author repo
     public static final String SORTING_AUTHORS_ASC = "SELECT * FROM Author AS a ORDER BY a.id ASC";
     public static final String SORTING_AUTHORS_DESC = "SELECT * FROM Author AS a ORDER BY a.id DESC";
+    public static final String GET_ID_BY_NAME = "SELECT a.id FROM Author AS a WHERE a.name = ?";
 
 
 }

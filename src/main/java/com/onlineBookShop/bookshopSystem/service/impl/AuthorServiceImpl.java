@@ -1,7 +1,6 @@
 package com.onlineBookShop.bookshopSystem.service.impl;
 
 import com.onlineBookShop.bookshopSystem.entity.Author;
-import com.onlineBookShop.bookshopSystem.entity.Book;
 import com.onlineBookShop.bookshopSystem.payLoad.response.AllAuthorResponse;
 import com.onlineBookShop.bookshopSystem.payLoad.response.AuthorResponse;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;

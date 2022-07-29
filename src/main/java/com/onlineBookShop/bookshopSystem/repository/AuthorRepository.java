@@ -15,6 +15,6 @@ public interface AuthorRepository extends JpaRepository<Author, Long> {
     Author findAuthorById(Long id);
     Author findByName(String name);
     Author findAuthorByName(String name);
-    @Query(value = "SELECT a.id FROM Author AS a WHERE a.name = ?",nativeQuery = true)
+    @Query(value = Constants.GET_ID_BY_NAME,nativeQuery = true)
     Long getAuthorIdByName(String name);
 }
