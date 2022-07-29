@@ -27,10 +27,10 @@ public class BookController {
         return bookService.findAllBook(pageNo,pageSize,sortBy);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/name/")
     @RolesAllowed({"user","admin"})
-    BaseResponse getBookByID(@PathVariable long id){
-        return bookService.getBookByID(id);
+    BaseResponse getBookByID(@RequestParam String name){
+        return bookService.getBookByName(name);
     }
 
     @PostMapping("")
@@ -41,8 +41,8 @@ public class BookController {
 
     @GetMapping("/author")
     @RolesAllowed({"user","admin"})
-    BaseResponse getBooksByAuthorId(@RequestParam(required = false) String name){
-        return bookService.getBooksByAuthorId(name);
+    BaseResponse getBooksByAuthorName(@RequestParam String name){
+        return bookService.getBooksByAuthorName(name);
     }
 
     @GetMapping("/method")

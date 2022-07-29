@@ -1,16 +1,16 @@
 package com.onlineBookShop.bookshopSystem.service.impl;
 
 import com.onlineBookShop.bookshopSystem.entity.Author;
+import com.onlineBookShop.bookshopSystem.entity.Book;
+import com.onlineBookShop.bookshopSystem.payLoad.response.AllAuthorResponse;
+import com.onlineBookShop.bookshopSystem.payLoad.response.AuthorResponse;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;
 import com.onlineBookShop.bookshopSystem.repository.AuthorRepository;
 import com.onlineBookShop.bookshopSystem.repository.BookRepository;
 import com.onlineBookShop.bookshopSystem.service.AuthorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -35,26 +35,38 @@ public class AuthorServiceImpl implements AuthorService {
     public Boolean checkAuthor(Long authorId) {
         try{
             String checkName = authorRepository.findAuthorById(authorId).getName();
-//            String checkName = authorRepository.authorName(authorId);
             return checkName != null;
         } catch (Exception e){
+            log.error("Error: {}",e.getMessage());
             return false;
         }
     }
 
     @Override
+    public String getAuthorNameById(Long authorId){
+        try{
+            return authorRepository.findAuthorById(authorId).getName();
+        }catch (Exception e){
+            log.error("Error: {}",e.getMessage());
+            return null;
+        }
+    }
+    @Override
     public BaseResponse createAuthor(Author author) {
         try{
-            List<Author> checking = authorRepository.findByName(author.getName());
-            if (checking.isEmpty()){
-                Author createAuthor = authorRepository.save(new Author(author.getName(),author.getDob(), author.getAddress(),
-                                                 author.getEmail(), author.getPhone(), LocalDateTime.now()));
-                return new BaseResponse("New Author "+createAuthor.getName() +" Created", createAuthor,
-                                        true, LocalDateTime.now());
+            Author checking = authorRepository.findByName(author.getName());
+            if (checking==null){
+                Author createAuthor = authorRepository.save(new Author(author.getName(),author.getDob(),
+                                                                       author.getAddress(), author.getEmail(),
+                                                                       author.getPhone(), LocalDateTime.now()));
+                return new BaseResponse("New Author "+createAuthor.getName() +" Created",
+                        convertAuthorResponse(createAuthor),
+                        true, LocalDateTime.now());
             }
-            return new BaseResponse("Duplicate Available",author,false,LocalDateTime.now());
+            return new BaseResponse("Duplicate Available", convertAuthorResponse(author),
+                    false,LocalDateTime.now());
         }catch (Exception e){
-            return new BaseResponse("Fail to create user",null,false, LocalDateTime.now());
+            return new BaseResponse("Fail to create user",e.getMessage(),false, LocalDateTime.now());
         }
     }
 
@@ -62,11 +74,12 @@ public class AuthorServiceImpl implements AuthorService {
     public BaseResponse getAuthors(Integer pageNo, Integer pageSize, String sortBy) {
         try{
             Pageable pageable = PageRequest.of(pageNo - 1,pageSize, Sort.by(sortBy));
-            Page<Author> pagedResult = authorRepository.findAll(pageable);
-
-            return new BaseResponse("Here is the list", pagedResult,true, LocalDateTime.now());
-        }catch (Exception E){
-            return new BaseResponse("Fail to get Authors",null,false, LocalDateTime.now());
+            List<AuthorResponse> pagedResult = authorRepository.findAll(pageable).stream()
+                                                               .map(this::convertAuthorResponse).toList();
+            AllAuthorResponse response = new AllAuthorResponse(pagedResult,pageNo,pageSize,sortBy);
+            return new BaseResponse("Here is the list", response, true, LocalDateTime.now());
+        }catch (Exception e){
+            return new BaseResponse("Fail to get Authors",e.getMessage(),false, LocalDateTime.now());
         }
     }
 
@@ -75,33 +88,37 @@ public class AuthorServiceImpl implements AuthorService {
         try{
             return switch (method) {
                 case 1 -> new BaseResponse("Here is the ascending sorted list",
-                        authorRepository.ascendingAuthorSorting(), true, LocalDateTime.now());
+                        authorRepository.ascendingAuthorSorting().stream().map(this::convertAuthorResponse),
+                        true, LocalDateTime.now());
                 case 2 -> new BaseResponse("Here is the descending sorted list",
-                        authorRepository.descendingAuthorSorting(), true, LocalDateTime.now());
+                        authorRepository.descendingAuthorSorting().stream().map(this::convertAuthorResponse),
+                        true, LocalDateTime.now());
                 default -> new BaseResponse("Incorrect Input", null, false, LocalDateTime.now());
             };
         }catch (Exception e){
-            return new BaseResponse("Fail to sort the author list",null,false, LocalDateTime.now());
+            return new BaseResponse("Fail to sort the author list",e.getMessage(),
+                    false, LocalDateTime.now());
         }
     }
 
     @Override
-    public BaseResponse updateAuthor(Long id, Author author) {
+    public BaseResponse updateAuthor(String name, Author author) {
         try{
-            Optional<Author> checkAuthor = authorRepository.findById(id);
+            Author checkAuthor = authorRepository.findByName(name);
             log.info("");
-            if (checkAuthor.isPresent()){
-                Author updatedAuthor = checkAuthor.get();
-                updatedAuthor.setName(author.getName());
-                updatedAuthor.setDob(author.getDob());
-                updatedAuthor.setPhone(author.getPhone());
-                authorRepository.save(updatedAuthor);
-                return new BaseResponse("Updated author with id: "+id,
-                        authorRepository.getReferenceById(id),true, LocalDateTime.now());
+            if (checkAuthor != null){
+                checkAuthor.setName(author.getName());
+                checkAuthor.setDob(author.getDob());
+                checkAuthor.setPhone(author.getPhone());
+                authorRepository.save(checkAuthor);
+                return new BaseResponse("Updated author",
+                        convertAuthorResponse(checkAuthor),true, LocalDateTime.now());
             }
-            return new BaseResponse("No Author found with id: "+id,null,false,LocalDateTime.now());
+            return new BaseResponse("No Author found with name: "+name,null,
+                    false,LocalDateTime.now());
         }catch (Exception e){
-            return new BaseResponse("Fail to update author with id "+id,null,false,LocalDateTime.now());
+            return new BaseResponse("Fail to update author with name: "+name,e.getMessage(),
+                    false,LocalDateTime.now());
         }
     }
 
@@ -116,32 +133,67 @@ public class AuthorServiceImpl implements AuthorService {
                 for (Long idsToDelete:booksToDelete){
                     bookRepository.deleteById(idsToDelete);
                 }
-                return new BaseResponse("Deleted books and author with id: "+id,author,true,LocalDateTime.now());
+                return new BaseResponse("Deleted books and author with id: "+id, convertAuthorResponse(author),
+                        true,LocalDateTime.now());
 
             }
-            return new BaseResponse("No Author found with id: "+id,null,false,LocalDateTime.now());
+            return new BaseResponse("No Author found with id: "+id,null,
+                    false,LocalDateTime.now());
         }catch (Exception e){
-            return new BaseResponse("Fail to delete author with id "+id,null,false,LocalDateTime.now());
+            return new BaseResponse("Fail to delete author with id "+id,e.getMessage(),
+                    false,LocalDateTime.now());
         }
     }
 
-    @Override
-    public BaseResponse getAuthorByID(long id) {
+    public BaseResponse findAuthorByName(String name) {
         try{
-            Author author = authorRepository.findAuthorById(id);
+            Author author = getAuthorByName(name);
             if (author == null){
-                return new BaseResponse("no author with author id: "+id,null,false,LocalDateTime.now());
+                return new BaseResponse("no author with author name: "+name,
+                        null,false,LocalDateTime.now());
             }
-            return new BaseResponse("Here is the author "+id,author,
+            return new BaseResponse("Here is the author ", convertAuthorResponse(author),
                                     true,LocalDateTime.now());
         }catch(Exception e){
-            return  new BaseResponse("Fail to find author id: "+id,null,
+            return  new BaseResponse("Fail to find author name: "+name,e.getMessage(),
                                     false,LocalDateTime.now());
         }
     }
 
     @Override
     public Author getAuthorByName(String name) {
-        return authorRepository.findAuthorByName(name);
+        try {
+            return authorRepository.findAuthorByName(name);
+        }catch (Exception e){
+            log.error("Error: {}",e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
+    public Author findById(long authorId) {
+        try{
+            return authorRepository.findAuthorById(authorId);
+        }catch (Exception e){
+            log.error("Error: {}",e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
+    public Long getAuthorIdByName(String name) {
+        try{
+            return authorRepository.getAuthorIdByName(name);
+        }catch (Exception e){
+            log.error("Error: {}",e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public AuthorResponse convertAuthorResponse(Author author){
+        return new AuthorResponse(
+                author.getName(),author.getDob(),
+                author.getAddress(),author.getEmail(),author.getPhone());
     }
 }

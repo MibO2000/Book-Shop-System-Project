@@ -1,2 +1,9 @@
-package com.onlineBookShop.bookshopSystem.service;public interface BookRedisService {
+package com.onlineBookShop.bookshopSystem.service;
+
+import com.onlineBookShop.bookshopSystem.entity.BookBuyable;
+
+import java.util.List;
+
+public interface BookRedisService {
+    List<BookBuyable> findAllBooks();
 }

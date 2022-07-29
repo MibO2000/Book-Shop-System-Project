@@ -1,7 +1,10 @@
 package com.onlineBookShop.bookshopSystem.controller;
 
+import com.onlineBookShop.bookshopSystem.entity.BookBuyable;
+import com.onlineBookShop.bookshopSystem.payLoad.request.OrderBuyingRequest;
 import com.onlineBookShop.bookshopSystem.payLoad.request.OrderDeleteRequest;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;
+import com.onlineBookShop.bookshopSystem.payLoad.response.BookBuyingResponse;
 import com.onlineBookShop.bookshopSystem.service.BookShopService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.security.RolesAllowed;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @RestController
 @Slf4j
@@ -33,14 +37,14 @@ public class BookBuyingController {
         return bookShopService.getBookList();
     }
 
-    @PostMapping("/order/{id}")
-    @RolesAllowed({"admin","user"})
-    public BaseResponse buyBook(@PathVariable Long id){
-        return bookShopService.buyBook(id);
+    @PostMapping("/order")
+    @RolesAllowed("user")
+    public BaseResponse buyBook(@RequestBody OrderBuyingRequest order){
+        return bookShopService.buyBook(order);
     }
 
-    @DeleteMapping("/order/delete")
-    @RolesAllowed({"admin","user"})
+    @DeleteMapping("/order")
+    @RolesAllowed("user")
     public BaseResponse deleteOrder(@RequestBody OrderDeleteRequest orderDeleteRequest){
         return bookShopService.deleteOrder(orderDeleteRequest);
     }

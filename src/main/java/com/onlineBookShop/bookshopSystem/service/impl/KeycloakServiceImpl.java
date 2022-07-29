@@ -1,6 +1,6 @@
 package com.onlineBookShop.bookshopSystem.service.impl;
 
-import com.onlineBookShop.bookshopSystem.constants.Util;
+
 import com.onlineBookShop.bookshopSystem.entity.User;
 import com.onlineBookShop.bookshopSystem.service.KeycloakService;
 import lombok.extern.slf4j.Slf4j;
@@ -25,13 +25,12 @@ public class KeycloakServiceImpl implements KeycloakService {
     private final Environment environment;
     private final Keycloak keycloak;
     private final HttpServletRequest httpServletRequest;
-    private final Util util;
 
-    public KeycloakServiceImpl(Environment environment, @Qualifier("Keycloak") Keycloak keycloak, HttpServletRequest httpServletRequest, Util util) {
+    public KeycloakServiceImpl(Environment environment, @Qualifier("Keycloak") Keycloak keycloak,
+                               HttpServletRequest httpServletRequest) {
         this.environment = environment;
         this.keycloak = keycloak;
         this.httpServletRequest = httpServletRequest;
-        this.util = util;
     }
 
     private String getRealm() {
@@ -89,7 +88,6 @@ public class KeycloakServiceImpl implements KeycloakService {
         } catch (Exception e) {
             log.error("Exception in user creation in Keycloak: " ,e);
         }
-        log.error("Error: {} ", util.toJson(newUser));
         return newUser;
     }
     @Override

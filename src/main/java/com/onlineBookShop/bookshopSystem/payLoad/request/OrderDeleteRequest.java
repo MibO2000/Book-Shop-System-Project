@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderDeleteRequest {
-    private Long bookId;
+    private String bookName;
     private Long orderId;
 }

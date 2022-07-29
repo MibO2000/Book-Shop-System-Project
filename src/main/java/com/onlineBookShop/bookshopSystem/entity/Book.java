@@ -29,7 +29,8 @@ public class Book {
     @Column
     private LocalDateTime createdAt;
 
-    public Book(String name, long authorId, LocalDate dateOfRelease, BigDecimal price, Integer bookCount, LocalDateTime createdAt) {
+    public Book(String name, long authorId, LocalDate dateOfRelease, BigDecimal price,
+                Integer bookCount, LocalDateTime createdAt) {
         this.name = name;
         this.authorId = authorId;
         this.dateOfRelease = dateOfRelease;

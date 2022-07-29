@@ -30,6 +30,4 @@ public class KeycloakConfig {
                 .password(env.getProperty("password"))
                 .build();
     }
-
-
 }

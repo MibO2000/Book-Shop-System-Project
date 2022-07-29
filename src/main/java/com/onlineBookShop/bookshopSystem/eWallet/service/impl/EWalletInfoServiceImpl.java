@@ -27,7 +27,8 @@ public class EWalletInfoServiceImpl implements EWalletInfoService {
     private final UserRepository userRepository;
     private final KeycloakService keycloakService;
     @Autowired
-    public EWalletInfoServiceImpl(AppConfig appConfig, EWalletInfoMapper mapper, UserRepository userRepository, KeycloakService keycloakService) {
+    public EWalletInfoServiceImpl(AppConfig appConfig, EWalletInfoMapper mapper,
+                                  UserRepository userRepository, KeycloakService keycloakService) {
         this.appConfig = appConfig;
         this.mapper = mapper;
         this.userRepository = userRepository;
@@ -68,7 +69,8 @@ public class EWalletInfoServiceImpl implements EWalletInfoService {
                     jdbcTemplate.queryForObject(appConfig.getEWalletInfo().getInfoQuery(),new Object[]{id},mapper),
                     true,LocalDateTime.now());
         }catch (Exception e){
-            return new BaseResponse("Fail to get User's wallet info",null,false, LocalDateTime.now());
+            return new BaseResponse("Fail to get User's wallet info",null,
+                    false, LocalDateTime.now());
         }
     }
 
@@ -79,7 +81,8 @@ public class EWalletInfoServiceImpl implements EWalletInfoService {
                     jdbcTemplate.query(appConfig.getEWalletInfo().getInfoAllQuery(),mapper),
                     true,LocalDateTime.now());
         }catch(Exception e){
-            return new BaseResponse("Fail to get aLl user wallet list",null,false,LocalDateTime.now());
+            return new BaseResponse("Fail to get aLl user wallet list",null,
+                    false,LocalDateTime.now());
         }
     }
 
@@ -106,7 +109,8 @@ public class EWalletInfoServiceImpl implements EWalletInfoService {
         if (ownerId == null){
             return false;
         }
-        EWalletInfo eWalletInfo = jdbcTemplate.queryForObject(appConfig.getEWalletInfo().getInfoQuery(),new Object[]{ownerId},mapper);
+        EWalletInfo eWalletInfo = jdbcTemplate.queryForObject(appConfig.getEWalletInfo().getInfoQuery(),
+                                                                new Object[]{ownerId},mapper);
         if (eWalletInfo==null){
             return false;
         }
@@ -126,7 +130,8 @@ public class EWalletInfoServiceImpl implements EWalletInfoService {
         Long id = getUserId();
         try{
             jdbcTemplate.update(appConfig.getEWalletInfo().getUpdateNameQuery(),accountName,id);
-            return new BaseResponse("Account name updated",getUserInfo().getResult(),true,LocalDateTime.now());
+            return new BaseResponse("Account name updated",getUserInfo().getResult(),
+                    true,LocalDateTime.now());
         }catch (Exception e){
             log.error("Error: "+e);
         }

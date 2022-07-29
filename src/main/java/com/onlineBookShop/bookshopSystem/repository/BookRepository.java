@@ -15,12 +15,12 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     List<Book> descendingBookSorting();
     @Query(value = Constants.ID_FOR_DELETE,nativeQuery = true)
     List<Long> idsForDelete(long id);
-    List<Book> findByName(String name);
     List<Book> findBooksByBookCountGreaterThan(Integer count);
     @Query(value = Constants.FIND_BOOK_AVAILABILITY, nativeQuery = true)
-    Integer findBookAvailability(Long id);
+    Integer findBookAvailability(Long bookId, Long authorId);
     @Query(value = Constants.GET_PRICE,nativeQuery = true)
     BigDecimal getBookPrice(Long id);
     Book findBookById(Long id);
+    Book findBookByName(String name);
     List<Book> findBooksByAuthorId(Long id);
 }

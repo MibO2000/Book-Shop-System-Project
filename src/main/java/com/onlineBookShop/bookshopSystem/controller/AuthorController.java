@@ -22,13 +22,13 @@ public class AuthorController {
     @RolesAllowed({"user","admin"})
     public BaseResponse getAuthors(@RequestParam(defaultValue = "1")Integer pageNo,
                                    @RequestParam(defaultValue = "10")Integer pageSize,
-                                   @RequestParam(defaultValue = "id")String sortBy){
+                                   @RequestParam(defaultValue = "name")String sortBy){
         return authorService.getAuthors(pageNo,pageSize,sortBy);
     }
-    @GetMapping("/{id}")
+    @GetMapping("/name/")
     @RolesAllowed({"user","admin"})
-    public BaseResponse getAuthorByID(@PathVariable long id){
-        return authorService.getAuthorByID(id);
+    public BaseResponse getAuthorByName(@RequestParam String name){
+        return authorService.findAuthorByName(name);
     }
 
     @PostMapping("")
@@ -43,10 +43,10 @@ public class AuthorController {
         return authorService.sortingAuthorList(method);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/")
     @RolesAllowed("admin")
-    public BaseResponse updateAuthor(@PathVariable Long id, @RequestBody Author author){
-        return authorService.updateAuthor(id,author);
+    public BaseResponse updateAuthor(@RequestParam String name, @RequestBody Author author){
+        return authorService.updateAuthor(name,author);
     }
 
     @DeleteMapping("/{id}")

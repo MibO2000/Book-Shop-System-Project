@@ -14,4 +14,5 @@ public interface EWalletHistoryService {
     List<EWalletHistory> getHistoryByDate(LocalDate date);
     EWalletHistory getHistoryByBookID(Long orderId);
     BaseResponse getSpecificEWalletHistory(Long id);
+
 }

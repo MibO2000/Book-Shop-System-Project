@@ -36,7 +36,8 @@ public class EWalletHistoryServiceImpl implements EWalletHistoryService {
     private final BookService bookService;
 
     @Autowired
-    public EWalletHistoryServiceImpl(JavaMailSender javaMailSender, EWalletHistoryMapper eWalletHistoryMapper, AppConfig appConfig, UserService userService, BookService bookService) {
+    public EWalletHistoryServiceImpl(JavaMailSender javaMailSender, EWalletHistoryMapper eWalletHistoryMapper,
+                                     AppConfig appConfig, UserService userService, BookService bookService) {
         this.javaMailSender = javaMailSender;
         this.eWalletHistoryMapper = eWalletHistoryMapper;
         this.appConfig = appConfig;
@@ -65,12 +66,14 @@ public class EWalletHistoryServiceImpl implements EWalletHistoryService {
     public BaseResponse getEachEWalletHistory() {
         try{
             Long id = userService.getUserId();
-            List<EWalletHistory> eWalletHistory = jdbcTemplate.query(appConfig.getEWalletHistory().getHistoryQuery(),new Object[]{id},eWalletHistoryMapper);
+            List<EWalletHistory> eWalletHistory = jdbcTemplate.query(appConfig.getEWalletHistory().getHistoryQuery(),
+                                                                        new Object[]{id},eWalletHistoryMapper);
             return (eWalletHistory==null)?
                     new BaseResponse("You have not buy book yet",null,false, LocalDateTime.now()):
                     new BaseResponse("Here is the data",eWalletHistory, true,LocalDateTime.now());
         }catch (Exception e){
-            return new BaseResponse("Fail to get User's wallet info",null,false, LocalDateTime.now());
+            return new BaseResponse("Fail to get User's wallet info",null,
+                    false, LocalDateTime.now());
         }
     }
 
@@ -132,13 +135,16 @@ public class EWalletHistoryServiceImpl implements EWalletHistoryService {
     @Override
     public BaseResponse getSpecificEWalletHistory(Long id) {
         try{
-            List<EWalletHistory> eWalletHistories = jdbcTemplate.query(appConfig.getEWalletHistory().getHistoryQuery(),new Object[]{id},eWalletHistoryMapper);
+            List<EWalletHistory> eWalletHistories = jdbcTemplate.query(appConfig.getEWalletHistory().getHistoryQuery(),
+                                                                        new Object[]{id},eWalletHistoryMapper);
             if (eWalletHistories == null){
-                return new BaseResponse("This user have no book history",null,false, LocalDateTime.now());
+                return new BaseResponse("This user have no book history",null,
+                        false, LocalDateTime.now());
             }
             return new BaseResponse("Here is the data",eWalletHistories, true,LocalDateTime.now());
         }catch (Exception e){
-            return new BaseResponse("Fail to get User's wallet info",null,false, LocalDateTime.now());
+            return new BaseResponse("Fail to get User's wallet info",null,
+                    false, LocalDateTime.now());
         }
     }
 
@@ -146,7 +152,8 @@ public class EWalletHistoryServiceImpl implements EWalletHistoryService {
     public void mailToUser(){
         try{
             List<EWalletHistory> eWalletHistoryList = jdbcTemplate.query(
-                    appConfig.getEWalletHistory().getHistoryQueryForMail(),new Object[]{LocalDate.now().minusDays(2)},eWalletHistoryMapper
+                    appConfig.getEWalletHistory().getHistoryQueryForMail(),
+                    new Object[]{LocalDate.now().minusDays(2)},eWalletHistoryMapper
             );
             log.info("List: "+eWalletHistoryList);
             if (eWalletHistoryList.isEmpty()){
