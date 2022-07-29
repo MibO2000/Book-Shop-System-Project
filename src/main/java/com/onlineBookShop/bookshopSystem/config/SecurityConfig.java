@@ -23,8 +23,6 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) {
         KeycloakAuthenticationProvider keycloakAuthenticationProvider = keycloakAuthenticationProvider();
-        SimpleAuthorityMapper simpleAuthorityMapper = new SimpleAuthorityMapper();
-        simpleAuthorityMapper.setConvertToUpperCase(true);
         keycloakAuthenticationProvider.setGrantedAuthoritiesMapper(new SimpleAuthorityMapper());
         auth.authenticationProvider(keycloakAuthenticationProvider);
     }
@@ -41,7 +39,12 @@ public class SecurityConfig extends KeycloakWebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         super.configure(http);
-        http.csrf().disable().cors().and().authorizeRequests().anyRequest().permitAll();
+        http
+                .csrf().disable()
+                .cors()
+                .and()
+                .authorizeRequests()
+                .anyRequest().permitAll();
     }
 }
 

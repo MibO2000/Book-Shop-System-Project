@@ -174,7 +174,6 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BigDecimal getBookPrice(Long id) {
-
         try {
             return bookRepository.getBookPrice(id);
         }catch (Exception e){

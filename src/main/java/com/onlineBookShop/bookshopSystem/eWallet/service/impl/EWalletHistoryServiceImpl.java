@@ -58,7 +58,7 @@ public class EWalletHistoryServiceImpl implements EWalletHistoryService {
                     jdbcTemplate.query(appConfig.getEWalletHistory().getHistoryAllQuery(),eWalletHistoryMapper),
                     true,LocalDateTime.now());
         }catch (Exception e){
-            return new BaseResponse("Fail to get All history",null,false, LocalDateTime.now());
+            return new BaseResponse("Fail to get All history",e.getMessage(),false, LocalDateTime.now());
         }
     }
 
@@ -68,11 +68,9 @@ public class EWalletHistoryServiceImpl implements EWalletHistoryService {
             Long id = userService.getUserId();
             List<EWalletHistory> eWalletHistory = jdbcTemplate.query(appConfig.getEWalletHistory().getHistoryQuery(),
                                                                         new Object[]{id},eWalletHistoryMapper);
-            return (eWalletHistory==null)?
-                    new BaseResponse("You have not buy book yet",null,false, LocalDateTime.now()):
-                    new BaseResponse("Here is the data",eWalletHistory, true,LocalDateTime.now());
+            return new BaseResponse("Here is the data",eWalletHistory, true,LocalDateTime.now());
         }catch (Exception e){
-            return new BaseResponse("Fail to get User's wallet info",null,
+            return new BaseResponse("Fail to get User's wallet info",e.getMessage(),
                     false, LocalDateTime.now());
         }
     }
@@ -137,13 +135,9 @@ public class EWalletHistoryServiceImpl implements EWalletHistoryService {
         try{
             List<EWalletHistory> eWalletHistories = jdbcTemplate.query(appConfig.getEWalletHistory().getHistoryQuery(),
                                                                         new Object[]{id},eWalletHistoryMapper);
-            if (eWalletHistories == null){
-                return new BaseResponse("This user have no book history",null,
-                        false, LocalDateTime.now());
-            }
             return new BaseResponse("Here is the data",eWalletHistories, true,LocalDateTime.now());
         }catch (Exception e){
-            return new BaseResponse("Fail to get User's wallet info",null,
+            return new BaseResponse("Fail to get User's wallet info",e.getMessage(),
                     false, LocalDateTime.now());
         }
     }
@@ -175,8 +169,9 @@ public class EWalletHistoryServiceImpl implements EWalletHistoryService {
                     helper.setTo(Objects.requireNonNull(simpleMailMessage.getTo()));
                     helper.setSubject(Objects.requireNonNull(simpleMailMessage.getSubject()));
                     helper.setText(Objects.requireNonNull(simpleMailMessage.getText()));
-                    javaMailSender.send(msg);
                     log.info("Sending mail.....");
+                    javaMailSender.send(msg);
+                    log.info("Mail sent");
                 }catch (Exception e){
                     log.error("Error sending User with history{}, error: {}",eWalletHistory,e.getLocalizedMessage());
                 }

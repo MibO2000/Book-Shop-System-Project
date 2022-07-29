@@ -3,6 +3,7 @@ package com.onlineBookShop.bookshopSystem.service.impl;
 import com.onlineBookShop.bookshopSystem.eWallet.entity.EWalletHistory;
 import com.onlineBookShop.bookshopSystem.eWallet.service.EWalletHistoryService;
 import com.onlineBookShop.bookshopSystem.eWallet.service.EWalletInfoService;
+import com.onlineBookShop.bookshopSystem.entity.Book;
 import com.onlineBookShop.bookshopSystem.entity.BookBuyable;
 import com.onlineBookShop.bookshopSystem.payLoad.request.OrderBuyingRequest;
 import com.onlineBookShop.bookshopSystem.payLoad.request.OrderDeleteRequest;
@@ -23,14 +24,12 @@ import java.util.List;
 @Service
 @Slf4j
 public class BookShopServiceImpl implements BookShopService {
-
     private final BookRedisService bookRedisService;
     private final EWalletHistoryService eWalletHistoryService;
     private final BookService bookService;
     private final AuthorService authorService;
     private final UserService userService;
     private final EWalletInfoService eWalletInfoService;
-
     @Autowired
     public BookShopServiceImpl(BookRedisService bookRedisService, EWalletHistoryService eWalletHistoryService,
                                BookService bookService, AuthorService authorService, UserService userService,
@@ -42,7 +41,6 @@ public class BookShopServiceImpl implements BookShopService {
         this.userService = userService;
         this.eWalletInfoService = eWalletInfoService;
     }
-
     @Override
     public BaseResponse getOrderList(LocalDate date) {
         try {
@@ -57,7 +55,6 @@ public class BookShopServiceImpl implements BookShopService {
                     false, LocalDateTime.now());
         }
     }
-
     @Override
     public BaseResponse getBookList() {
         try {
@@ -69,13 +66,17 @@ public class BookShopServiceImpl implements BookShopService {
             return null;
         }
     }
-
     @Override
     public BaseResponse buyBook(OrderBuyingRequest order) {
         try {
             String bookName = order.getBookName();
             Long authorId = authorService.getAuthorIdByName(order.getAuthorName());
-            Long bookId = bookService.findBookByName(bookName).getId();
+            Book book = bookService.findBookByName(bookName);
+            if (book == null){
+                return new BaseResponse("Book name does not exists",bookName,
+                                        false,LocalDateTime.now());
+            }
+            Long bookId = book.getId();
             Integer count = bookService.findBookAvailability(bookId,authorId);
             if (count < 1) {
                 return new BaseResponse("Book Out of stock", null, false, LocalDateTime.now());
@@ -91,8 +92,7 @@ public class BookShopServiceImpl implements BookShopService {
                 return new BaseResponse("Book Count not updated", null,
                         false, LocalDateTime.now());
             }
-            BigDecimal newBalance = balance.subtract(price);
-            return eWalletUpdateResponse(newBalance,bookId,balance);
+            return eWalletUpdateResponse(balance.subtract(price),bookId,balance);
         } catch (Exception e) {
             return new BaseResponse("Fail to buy book", e.getMessage(), false, LocalDateTime.now());
         }
@@ -111,7 +111,7 @@ public class BookShopServiceImpl implements BookShopService {
                 return new BaseResponse("Fail to get into history table", null,
                         false, LocalDateTime.now());
             }
-            return new BaseResponse("Buy successful", eWalletHistoryService.getEachEWalletHistory(),
+            return new BaseResponse("Buy successful", eWalletHistoryService.getEachEWalletHistory().getResult(),
                     true, LocalDateTime.now());
         }catch (Exception e){
             log.error("Error: {}",e.getMessage());

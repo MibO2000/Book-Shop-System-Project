@@ -7,7 +7,9 @@ import com.onlineBookShop.bookshopSystem.eWallet.mapper.EWalletHistoryMapper;
 import com.onlineBookShop.bookshopSystem.eWallet.service.EWalletInfoService;
 import com.onlineBookShop.bookshopSystem.entity.User;
 import com.onlineBookShop.bookshopSystem.payLoad.request.UserCreationRequest;
+import com.onlineBookShop.bookshopSystem.payLoad.response.AllUserResponse;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;
+import com.onlineBookShop.bookshopSystem.payLoad.response.UserResponse;
 import com.onlineBookShop.bookshopSystem.repository.UserRepository;
 import com.onlineBookShop.bookshopSystem.service.KeycloakService;
 import com.onlineBookShop.bookshopSystem.service.UserService;
@@ -53,7 +55,10 @@ public class UserServiceImpl implements UserService {
         try{
             Pageable pageable = PageRequest.of(pageNo-1,pageSize,Sort.by(sortBy));
             Page<User> pagedResult = userRepository.findAll(pageable);
-            return new BaseResponse("Here is the list of users",pagedResult,
+            AllUserResponse response = new AllUserResponse(
+                    pagedResult.stream().map(this::convertUserResponse).toList(),pageNo,pageSize,sortBy
+            );
+            return new BaseResponse("Here is the list of users",response,
                     true,LocalDateTime.now());
         }catch(Exception e){
             return new BaseResponse("Fail to get all the users",e.getMessage(),
@@ -69,7 +74,8 @@ public class UserServiceImpl implements UserService {
         User user = userCreationRequest.getUser();
         BigDecimal balance = userCreationRequest.getBalance();
         if(!userCheck(user)){
-            return new BaseResponse("Duplicate Available",user,false,LocalDateTime.now());
+            return new BaseResponse("Duplicate Available",convertUserResponse(user),
+                    false,LocalDateTime.now());
         }
         try{
             UserRepresentation kcuser = keycloakService.createUser(user);
@@ -80,12 +86,14 @@ public class UserServiceImpl implements UserService {
                 EWalletInfo eWalletInfo = new EWalletInfo
                         (newUser.getId(), newUser.getName(), LocalDateTime.now(), balance);
                 if(eWalletInfoService.createNewEWallet(eWalletInfo)){
-                    return new BaseResponse("New User Created",newUser,true,LocalDateTime.now());
+                    return new BaseResponse("New User Created",convertUserResponse(newUser),
+                            true,LocalDateTime.now());
                 }
-                return new BaseResponse("Fail to create Wallet",newUser,false,LocalDateTime.now());
+                return new BaseResponse("Fail to create Wallet",convertUserResponse(newUser),
+                        false,LocalDateTime.now());
             }
             else{
-                return new BaseResponse("Fail to create data in Keycloak",user,
+                return new BaseResponse("Fail to create data in Keycloak",convertUserResponse(user),
                         false,LocalDateTime.now());
             }
         }catch (Exception e){
@@ -131,7 +139,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public BaseResponse findUserById(Long userId) {
         try{
-            return new BaseResponse("Here is the user",userRepository.findUserById(userId),
+            return new BaseResponse("Here is the user",convertUserResponse(userRepository.findUserById(userId)),
                     true,LocalDateTime.now());
         }catch (Exception e){
             return new BaseResponse("Fail to get user",e.getMessage(),false,LocalDateTime.now());
@@ -151,11 +159,14 @@ public class UserServiceImpl implements UserService {
             if (userRepresentation != null){
                 userRepository.delete(user);
                 if (eWalletInfoService.deleteUserInfo(userId)){
-                    return new BaseResponse("User Deleted",user,true,LocalDateTime.now());
+                    return new BaseResponse("User Deleted",convertUserResponse(user),
+                            true,LocalDateTime.now());
                 }
-                return new BaseResponse("Fail to delete eWalletInfo",user,false,LocalDateTime.now());
+                return new BaseResponse("Fail to delete eWalletInfo",convertUserResponse(user),
+                        false,LocalDateTime.now());
             }
-            return new BaseResponse("Fail to delete keycloak user info",user,false,LocalDateTime.now());
+            return new BaseResponse("Fail to delete keycloak user info",convertUserResponse(user),
+                    false,LocalDateTime.now());
         }catch (Exception e){
             return new BaseResponse("Fail to delete user",e.getMessage(),false,LocalDateTime.now());
         }
@@ -171,5 +182,8 @@ public class UserServiceImpl implements UserService {
             log.error("Error: {}",e.getMessage());
             return null;
         }
+    }
+    private UserResponse convertUserResponse(User user){
+        return new UserResponse(user.getName(),user.getDob(),user.getAddress(),user.getEmail(),user.getPhone());
     }
 }

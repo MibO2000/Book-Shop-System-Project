@@ -6,6 +6,7 @@ import com.onlineBookShop.bookshopSystem.eWallet.mapper.EWalletInfoMapper;
 import com.onlineBookShop.bookshopSystem.eWallet.service.EWalletInfoService;
 import com.onlineBookShop.bookshopSystem.payLoad.request.BalanceUpdateRequest;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;
+import com.onlineBookShop.bookshopSystem.payLoad.response.EWalletInfoResponse;
 import com.onlineBookShop.bookshopSystem.repository.UserRepository;
 import com.onlineBookShop.bookshopSystem.service.KeycloakService;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -65,11 +67,12 @@ public class EWalletInfoServiceImpl implements EWalletInfoService {
     public BaseResponse getUserInfo() {
         try{
             Long id = getUserId();
+            EWalletInfo info = jdbcTemplate.queryForObject(appConfig.getEWalletInfo().getInfoQuery(),new Object[]{id},mapper);
             return new BaseResponse("Here is the data",
-                    jdbcTemplate.queryForObject(appConfig.getEWalletInfo().getInfoQuery(),new Object[]{id},mapper),
+                    new EWalletInfoResponse(info.getAccountName(),info.getBalance()),
                     true,LocalDateTime.now());
         }catch (Exception e){
-            return new BaseResponse("Fail to get User's wallet info",null,
+            return new BaseResponse("Fail to get User's wallet info",e.getMessage(),
                     false, LocalDateTime.now());
         }
     }
@@ -77,11 +80,12 @@ public class EWalletInfoServiceImpl implements EWalletInfoService {
     @Override
     public BaseResponse getAllUserInfo() {
         try{
+            List<EWalletInfo> userInfo = jdbcTemplate.query(appConfig.getEWalletInfo().getInfoAllQuery(),mapper);
             return new BaseResponse("Here is all user wallet list",
-                    jdbcTemplate.query(appConfig.getEWalletInfo().getInfoAllQuery(),mapper),
+                    userInfo.stream().map(this::convertEWalletInfoResponse),
                     true,LocalDateTime.now());
         }catch(Exception e){
-            return new BaseResponse("Fail to get aLl user wallet list",null,
+            return new BaseResponse("Fail to get aLl user wallet list",e.getMessage(),
                     false,LocalDateTime.now());
         }
     }
@@ -96,11 +100,15 @@ public class EWalletInfoServiceImpl implements EWalletInfoService {
         }
         try{
             if(jdbcTemplate.update(appConfig.getEWalletInfo().getInfoUpdateQuery(),balance,accountName,ownerId)>0){
-                return new BaseResponse("The user info updated",accountName,true,LocalDateTime.now());
+                return new BaseResponse("The user info updated",
+                                        new EWalletInfoResponse(accountName,balance),
+                                        true,LocalDateTime.now());
             }
-            return new BaseResponse("The user info not updated",accountName,false,LocalDateTime.now());
+            return new BaseResponse("The user info not updated",
+                                    new EWalletInfoResponse(accountName,balance),
+                                    false,LocalDateTime.now());
         }catch(Exception e){
-            return new BaseResponse("Fail to update user",null,false,LocalDateTime.now());
+            return new BaseResponse("Fail to update user",e.getMessage(),false,LocalDateTime.now());
         }
     }
 
@@ -175,6 +183,9 @@ public class EWalletInfoServiceImpl implements EWalletInfoService {
             log.error("Error: "+e);
             return null;
         }
+    }
+    private EWalletInfoResponse convertEWalletInfoResponse(EWalletInfo eWalletInfo){
+        return new EWalletInfoResponse(eWalletInfo.getAccountName(),eWalletInfo.getBalance());
     }
 
 }
