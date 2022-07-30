@@ -25,11 +25,11 @@ public class UserController {
                                     @RequestParam(defaultValue = "id") String sortBy){
         return userService.getAllUsers(pageNo,pageSize,sortBy);
     }
-    @GetMapping("/{id}")
+    @GetMapping("/")
     @CrossOrigin
     @RolesAllowed("admin")
-    public BaseResponse getUserById(@PathVariable Long id){
-        return userService.findUserById(id);
+    public BaseResponse getUserById(@RequestParam String name){
+        return userService.findUserByName(name);
     }
     @PostMapping()
     @CrossOrigin
@@ -37,10 +37,10 @@ public class UserController {
     public BaseResponse createNewUser(@RequestBody UserCreationRequest userCreationRequest){
         return userService.createNewUser(userCreationRequest);
     }
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/delete/")
     @CrossOrigin
     @RolesAllowed("admin")
-    public BaseResponse deleteUser(@PathVariable Long userId){
-        return userService.deleteUser(userId);
+    public BaseResponse deleteUser(@RequestParam String name){
+        return userService.deleteUser(name);
     }
 }

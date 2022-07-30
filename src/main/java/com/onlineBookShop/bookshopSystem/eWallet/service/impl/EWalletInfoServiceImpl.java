@@ -94,12 +94,11 @@ public class EWalletInfoServiceImpl implements EWalletInfoService {
     public BaseResponse updateUserBalanceInfo(BalanceUpdateRequest balanceUpdateRequest) {
         String accountName = balanceUpdateRequest.getName();
         BigDecimal balance = balanceUpdateRequest.getBalance();
-        Long ownerId = balanceUpdateRequest.getId();;
         if (accountName == null || balance == null){
             return new BaseResponse("Need to fill info",null,false,LocalDateTime.now());
         }
         try{
-            if(jdbcTemplate.update(appConfig.getEWalletInfo().getInfoUpdateQuery(),balance,accountName,ownerId)>0){
+            if(jdbcTemplate.update(appConfig.getEWalletInfo().getInfoUpdateQuery(),balance,accountName)>0){
                 return new BaseResponse("The user info updated",
                                         new EWalletInfoResponse(accountName,balance),
                                         true,LocalDateTime.now());
@@ -131,22 +130,6 @@ public class EWalletInfoServiceImpl implements EWalletInfoService {
     }
 
     @Override
-    public BaseResponse updateUserNameInfo(String accountName) {
-        if (accountName == null){
-            return new BaseResponse("Need to fill info",null,false,LocalDateTime.now());
-        }
-        Long id = getUserId();
-        try{
-            jdbcTemplate.update(appConfig.getEWalletInfo().getUpdateNameQuery(),accountName,id);
-            return new BaseResponse("Account name updated",getUserInfo().getResult(),
-                    true,LocalDateTime.now());
-        }catch (Exception e){
-            log.error("Error: "+e);
-        }
-        return null;
-    }
-
-    @Override
     public Boolean updateBalanceAfterBuying(BigDecimal balance) {
         Long id = getUserId();
         try{
@@ -172,7 +155,6 @@ public class EWalletInfoServiceImpl implements EWalletInfoService {
             return false;
         }
     }
-
     @Override
     public BigDecimal getBalance() {
         Long ownerId = getUserId();

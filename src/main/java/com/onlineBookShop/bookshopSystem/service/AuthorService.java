@@ -1,6 +1,7 @@
 package com.onlineBookShop.bookshopSystem.service;
 
 import com.onlineBookShop.bookshopSystem.entity.Author;
+import com.onlineBookShop.bookshopSystem.payLoad.request.AuthorRequest;
 import com.onlineBookShop.bookshopSystem.payLoad.response.AuthorResponse;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;
 
@@ -12,11 +13,10 @@ public interface AuthorService {
     BaseResponse createAuthor(Author author);
     BaseResponse getAuthors(Integer pageNo, Integer pageSize, String sortBy);
     BaseResponse sortingAuthorList(Integer method);
-    BaseResponse updateAuthor(String name, Author author);
-    BaseResponse deleteAuthor(Long id);
+    BaseResponse updateAuthor(String name, AuthorRequest authorRequest);
+    BaseResponse deleteAuthor(String name);
     BaseResponse findAuthorByName(String name);
     Author getAuthorByName(String name);
-    Author findById(long authorId);
     Long getAuthorIdByName(String name);
     AuthorResponse convertAuthorResponse(Author author);
 }

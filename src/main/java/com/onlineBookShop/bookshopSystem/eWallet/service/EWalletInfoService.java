@@ -11,7 +11,6 @@ public interface EWalletInfoService {
     BaseResponse getUserInfo();
     BaseResponse getAllUserInfo();
     BaseResponse updateUserBalanceInfo(BalanceUpdateRequest balanceUpdateRequest);
-    BaseResponse updateUserNameInfo(String accountName);
     Boolean updateBalanceAfterBuying(BigDecimal balance);
     Boolean updateBalanceAfterDeleting(BigDecimal balance);
     BigDecimal getBalance();

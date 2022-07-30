@@ -137,9 +137,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public BaseResponse findUserById(Long userId) {
+    public BaseResponse findUserByName(String name) {
         try{
-            return new BaseResponse("Here is the user",convertUserResponse(userRepository.findUserById(userId)),
+            User user = userRepository.findUserByName(name);
+            if (user == null){
+                return new BaseResponse("User "+name+" does not exist",null,
+                                        false,LocalDateTime.now());
+            }
+            return new BaseResponse("Here is the user",convertUserResponse(user),
                     true,LocalDateTime.now());
         }catch (Exception e){
             return new BaseResponse("Fail to get user",e.getMessage(),false,LocalDateTime.now());
@@ -147,25 +152,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public BaseResponse deleteUser(Long userId) {
+    public BaseResponse deleteUser(String name) {
         try{
+            User userToDelete = userRepository.findUserByName(name);
+            if (userToDelete == null){
+                return new BaseResponse("User not found",null,false,LocalDateTime.now());
+            }
+            long userId = userToDelete.getId();
             List<EWalletHistory> eWalletHistoryList = checkHistoryToDeleteUser(userId);
             if (!eWalletHistoryList.isEmpty()){
                 return new BaseResponse("Cannot delete user yet as books are left to deliver",
                         eWalletHistoryList,false,LocalDateTime.now());
             }
-            User user = userRepository.findUserById(userId);
-            UserRepresentation userRepresentation = keycloakService.deleteUser(user);
+            UserRepresentation userRepresentation = keycloakService.deleteUser(userToDelete);
             if (userRepresentation != null){
-                userRepository.delete(user);
+                userRepository.delete(userToDelete);
                 if (eWalletInfoService.deleteUserInfo(userId)){
-                    return new BaseResponse("User Deleted",convertUserResponse(user),
+                    return new BaseResponse("User Deleted",convertUserResponse(userToDelete),
                             true,LocalDateTime.now());
                 }
-                return new BaseResponse("Fail to delete eWalletInfo",convertUserResponse(user),
+                return new BaseResponse("Fail to delete eWalletInfo",convertUserResponse(userToDelete),
                         false,LocalDateTime.now());
             }
-            return new BaseResponse("Fail to delete keycloak user info",convertUserResponse(user),
+            return new BaseResponse("Fail to delete keycloak user info",convertUserResponse(userToDelete),
                     false,LocalDateTime.now());
         }catch (Exception e){
             return new BaseResponse("Fail to delete user",e.getMessage(),false,LocalDateTime.now());

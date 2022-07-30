@@ -1,6 +1,7 @@
 package com.onlineBookShop.bookshopSystem.controller;
 
 import com.onlineBookShop.bookshopSystem.entity.Book;
+import com.onlineBookShop.bookshopSystem.payLoad.request.BookCreateRequest;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;
 import com.onlineBookShop.bookshopSystem.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +39,8 @@ public class BookController {
     @PostMapping("")
     @CrossOrigin
     @RolesAllowed("admin")
-    BaseResponse uploadBook(@RequestBody Book book){
-        return bookService.createBook(book);
+    BaseResponse uploadBook(@RequestBody BookCreateRequest request){
+        return bookService.createBook(request);
     }
 
     @GetMapping("/author")
@@ -56,17 +57,17 @@ public class BookController {
         return bookService.sortingBookList(method);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{name}")
     @CrossOrigin
     @RolesAllowed("admin")
-    public BaseResponse updateBook(@PathVariable Long id, @RequestBody Book book){
-        return bookService.updateBook(id, book);
+    public BaseResponse updateBook(@PathVariable String name, @RequestBody BookCreateRequest request){
+        return bookService.updateBook(name, request);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete")
     @CrossOrigin
     @RolesAllowed("admin")
-    public BaseResponse deleteBook(@PathVariable Long id) { return bookService.deleteBook(id);}
+    public BaseResponse deleteBook(@RequestParam String name) { return bookService.deleteBook(name);}
 
 }
 

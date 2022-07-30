@@ -18,13 +18,6 @@ public class EWalletInfoController {
     public EWalletInfoController(EWalletInfoService eWalletInfoService) {
         this.eWalletInfoService = eWalletInfoService;
     }
-
-    @PostMapping()
-    @CrossOrigin
-    @RolesAllowed("admin")
-    public boolean createNewEWallet(EWalletInfo eWalletInfo){
-        return eWalletInfoService.createNewEWallet(eWalletInfo);
-    }
     @GetMapping()
     @CrossOrigin
     @RolesAllowed("user")
@@ -44,11 +37,5 @@ public class EWalletInfoController {
     @RolesAllowed("admin")
     public BaseResponse updateUserBalanceInfo(@RequestBody BalanceUpdateRequest balanceUpdateRequest) {
         return eWalletInfoService.updateUserBalanceInfo(balanceUpdateRequest);
-    }
-    @PutMapping("")
-    @CrossOrigin
-    @RolesAllowed("user")
-    public BaseResponse updateUserNameInfo(@RequestBody String accountName){
-        return eWalletInfoService.updateUserNameInfo(accountName);
     }
 }

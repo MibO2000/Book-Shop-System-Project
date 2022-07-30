@@ -2,6 +2,7 @@ package com.onlineBookShop.bookshopSystem.service.impl;
 
 import com.onlineBookShop.bookshopSystem.entity.Author;
 import com.onlineBookShop.bookshopSystem.entity.Book;
+import com.onlineBookShop.bookshopSystem.payLoad.request.BookCreateRequest;
 import com.onlineBookShop.bookshopSystem.payLoad.response.AllBookResponse;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BookResponse;
@@ -45,22 +46,22 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BaseResponse createBook(Book book) {
+    public BaseResponse createBook(BookCreateRequest request) {
         try{
-            Long authorId = book.getAuthorId();
+            Long authorId = authorService.getAuthorIdByName(request.getAuthorName());
             if (!authorService.checkAuthor(authorId)){
                 return new BaseResponse("Create the author first!",null,
                         false, LocalDateTime.now());
             }
-            Book checkBook = bookRepository.findBookByName(book.getName());
-            Author checkAuthor = authorService.findById(book.getAuthorId());
-            if (checkBook == null || checkAuthor == null){
-                Book uploadedBook = bookRepository.save(new Book(book.getName(),book.getAuthorId(),
-                        book.getDateOfRelease(),book.getPrice(), book.getBookCount(), LocalDateTime.now()));
-                return new BaseResponse("New Book created", convertBookResponse(uploadedBook),
-                        true,LocalDateTime.now());
+            Book book= bookRepository.findBookByName(request.getBookName());
+            if(book != null){
+                return new BaseResponse("Duplicate name", null, false, LocalDateTime.now());
+
             }
-            return new BaseResponse("Duplicate available",null,false,LocalDateTime.now());
+            Book uploadedBook = bookRepository.save(new Book(request.getBookName(),authorId,
+                    request.getDateOfRelease(),request.getPrice(), request.getBookCount(), LocalDateTime.now()));
+            return new BaseResponse("New Book created", convertBookResponse(uploadedBook),
+                    true,LocalDateTime.now());
         } catch (Exception e){
             return new BaseResponse("Fail to upload book",e.getMessage(),false,LocalDateTime.now());
         }
@@ -106,42 +107,46 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BaseResponse updateBook(Long id, Book book) {
+    public BaseResponse updateBook(String name, BookCreateRequest request) {
         try{
-            Optional<Book> checkBook = bookRepository.findById(id);
-            if(checkBook.isPresent()){
-                Book updatedBook = checkBook.get();
-                updatedBook.setName(book.getName());
-                updatedBook.setPrice(book.getPrice());
-                updatedBook.setBookCount(book.getBookCount());
-                updatedBook.setDateOfRelease(book.getDateOfRelease());
-                updatedBook.setAuthorId(book.getId());
-                updatedBook.setCreatedAt(book.getCreatedAt());
-                bookRepository.save(updatedBook);
-                return new BaseResponse("Book "+ id + " is updated", convertBookResponse(updatedBook),
+            Book bookToUpdate = bookRepository.findBookByName(name);
+            if(bookToUpdate != null){
+                bookToUpdate.setName(request.getBookName());
+                bookToUpdate.setPrice(request.getPrice());
+                bookToUpdate.setBookCount(request.getBookCount());
+                bookToUpdate.setDateOfRelease(request.getDateOfRelease());
+                bookToUpdate.setAuthorId(authorService.getAuthorIdByName(request.getAuthorName()));
+                bookRepository.save(bookToUpdate);
+                return new BaseResponse("Book "+ name + " is updated", convertBookResponse(bookToUpdate),
                         true,LocalDateTime.now());
             }
-            return new BaseResponse("Book "+id+" is not present",null,false,LocalDateTime.now());
+            return new BaseResponse("Book "+name+" is not present",null,false,LocalDateTime.now());
         }catch (Exception e){
-            return new BaseResponse("Fail to updaate a book with id:"+id,e.getMessage(),
+            return new BaseResponse("Fail to updaate a book with name:"+name,e.getMessage(),
                     false,LocalDateTime.now());
         }
     }
 
     @Override
-    public BaseResponse deleteBook(Long id) {
+    public BaseResponse deleteBook(String name) {
         try{
+            Book bookToDelete = findBookByName(name);
+            if (bookToDelete == null){
+                return new BaseResponse("Book: " + name+" is not in the list", null,
+                        false,LocalDateTime.now());
+            }
+            long id = bookToDelete.getId();
             Optional<Book> checkBook = bookRepository.findById(id);
             if (checkBook.isPresent()){
                 Book book = bookRepository.getReferenceById(id);
                 bookRepository.deleteById(id);
-                return new BaseResponse("Book "+id+" is deleted", convertBookResponse(book),
+                return new BaseResponse("Book: "+name+" is deleted", convertBookResponse(book),
                         true,LocalDateTime.now());
             }
-            return new BaseResponse("Book "+id+" is not available",null,
+            return new BaseResponse("Book: "+name+" is not available",null,
                     false,LocalDateTime.now());
         }catch(Exception e) {
-            return new BaseResponse("Fail to delete a book with id:" + id, e.getMessage(),
+            return new BaseResponse("Fail to delete a book with name: " + name, e.getMessage(),
                     false,LocalDateTime.now());
         }
     }

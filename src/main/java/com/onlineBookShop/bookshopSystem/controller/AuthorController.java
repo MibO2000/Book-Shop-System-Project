@@ -1,6 +1,7 @@
 package com.onlineBookShop.bookshopSystem.controller;
 
 import com.onlineBookShop.bookshopSystem.entity.Author;
+import com.onlineBookShop.bookshopSystem.payLoad.request.AuthorRequest;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;
 import com.onlineBookShop.bookshopSystem.service.AuthorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,12 +51,12 @@ public class AuthorController {
     @PutMapping("/")
     @CrossOrigin
     @RolesAllowed("admin")
-    public BaseResponse updateAuthor(@RequestParam String name, @RequestBody Author author){
-        return authorService.updateAuthor(name,author);
+    public BaseResponse updateAuthor(@RequestParam String name, @RequestBody AuthorRequest authorRequest){
+        return authorService.updateAuthor(name,authorRequest);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/")
     @CrossOrigin
     @RolesAllowed("admin")
-    public BaseResponse deleteAuthor(@PathVariable Long id){ return authorService.deleteAuthor(id); }
+    public BaseResponse deleteAuthor(@RequestParam String name){ return authorService.deleteAuthor(name); }
 }

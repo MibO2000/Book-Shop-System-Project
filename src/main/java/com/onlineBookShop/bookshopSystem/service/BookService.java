@@ -1,6 +1,7 @@
 package com.onlineBookShop.bookshopSystem.service;
 
 import com.onlineBookShop.bookshopSystem.entity.Book;
+import com.onlineBookShop.bookshopSystem.payLoad.request.BookCreateRequest;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BookResponse;
 
@@ -9,11 +10,11 @@ import java.util.List;
 
 public interface BookService {
     BaseResponse findAllBook(Integer pageNo, Integer pageSize, String sortBy);
-    BaseResponse createBook(Book book);
+    BaseResponse createBook(BookCreateRequest request);
     BaseResponse getBooksByAuthorName(String name);
     BaseResponse sortingBookList(Integer method);
-    BaseResponse updateBook(Long id, Book book);
-    BaseResponse deleteBook(Long id);
+    BaseResponse updateBook(String name, BookCreateRequest request);
+    BaseResponse deleteBook(String name);
     BaseResponse getBookByName(String name);
     List<Book> findBookStock();
     Boolean updateBookCount(Integer count, String bookName);
@@ -21,6 +22,5 @@ public interface BookService {
     BigDecimal getBookPrice(Long id);
     Book findBookById(Long id);
     Book findBookByName(String name);
-
     BookResponse convertBookResponse(Book book);
 }

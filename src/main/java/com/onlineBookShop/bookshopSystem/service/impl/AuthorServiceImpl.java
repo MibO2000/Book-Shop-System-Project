@@ -1,6 +1,7 @@
 package com.onlineBookShop.bookshopSystem.service.impl;
 
 import com.onlineBookShop.bookshopSystem.entity.Author;
+import com.onlineBookShop.bookshopSystem.payLoad.request.AuthorRequest;
 import com.onlineBookShop.bookshopSystem.payLoad.response.AllAuthorResponse;
 import com.onlineBookShop.bookshopSystem.payLoad.response.AuthorResponse;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;
@@ -101,14 +102,15 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     @Override
-    public BaseResponse updateAuthor(String name, Author author) {
+    public BaseResponse updateAuthor(String name, AuthorRequest authorRequest) {
         try{
             Author checkAuthor = authorRepository.findByName(name);
-            log.info("");
             if (checkAuthor != null){
-                checkAuthor.setName(author.getName());
-                checkAuthor.setDob(author.getDob());
-                checkAuthor.setPhone(author.getPhone());
+                checkAuthor.setName(authorRequest.getName());
+                checkAuthor.setDob(authorRequest.getDob());
+                checkAuthor.setAddress(authorRequest.getAddress());
+                checkAuthor.setPhone(authorRequest.getPhone());
+                checkAuthor.setEmail(authorRequest.getEmail());
                 authorRepository.save(checkAuthor);
                 return new BaseResponse("Updated author",
                         convertAuthorResponse(checkAuthor),true, LocalDateTime.now());
@@ -122,24 +124,23 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     @Override
-    public BaseResponse deleteAuthor(Long id) {
+    public BaseResponse deleteAuthor(String name) {
         try{
-            Optional<Author> checkAuthor = authorRepository.findById(id);
-            if (checkAuthor.isPresent()){
-                Author author = authorRepository.getReferenceById(id);
-                authorRepository.deleteById(id);
-                List<Long> booksToDelete = bookRepository.idsForDelete(id);
-                for (Long idsToDelete:booksToDelete){
-                    bookRepository.deleteById(idsToDelete);
-                }
-                return new BaseResponse("Deleted books and author with id: "+id, convertAuthorResponse(author),
-                        true,LocalDateTime.now());
-
+            Author author = authorRepository.findByName(name);
+            if (author == null){
+                return new BaseResponse("No Author found name: "+name,null,
+                        false,LocalDateTime.now());
             }
-            return new BaseResponse("No Author found with id: "+id,null,
-                    false,LocalDateTime.now());
+            long id = author.getId();
+            List<Long> booksToDelete = bookRepository.idsForDelete(id);
+            for (Long idsToDelete: booksToDelete){
+                bookRepository.deleteById(idsToDelete);
+            }
+            authorRepository.deleteById(id);
+            return new BaseResponse("Deleted books and author: "+name, convertAuthorResponse(author),
+                    true,LocalDateTime.now());
         }catch (Exception e){
-            return new BaseResponse("Fail to delete author with id "+id,e.getMessage(),
+            return new BaseResponse("Fail to delete author "+name,e.getMessage(),
                     false,LocalDateTime.now());
         }
     }
@@ -163,16 +164,6 @@ public class AuthorServiceImpl implements AuthorService {
     public Author getAuthorByName(String name) {
         try {
             return authorRepository.findAuthorByName(name);
-        }catch (Exception e){
-            log.error("Error: {}",e.getMessage());
-            return null;
-        }
-    }
-
-    @Override
-    public Author findById(long authorId) {
-        try{
-            return authorRepository.findAuthorById(authorId);
         }catch (Exception e){
             log.error("Error: {}",e.getMessage());
             return null;

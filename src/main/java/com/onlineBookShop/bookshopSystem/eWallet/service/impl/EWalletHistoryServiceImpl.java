@@ -6,7 +6,9 @@ import com.onlineBookShop.bookshopSystem.eWallet.mapper.EWalletHistoryMapper;
 import com.onlineBookShop.bookshopSystem.eWallet.service.EWalletHistoryService;
 import com.onlineBookShop.bookshopSystem.entity.Book;
 import com.onlineBookShop.bookshopSystem.entity.User;
+import com.onlineBookShop.bookshopSystem.payLoad.response.AllEWalletHistoryResponse;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;
+import com.onlineBookShop.bookshopSystem.payLoad.response.OrderResponse;
 import com.onlineBookShop.bookshopSystem.service.BookService;
 import com.onlineBookShop.bookshopSystem.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -54,33 +56,50 @@ public class EWalletHistoryServiceImpl implements EWalletHistoryService {
     @Override
     public BaseResponse getAllEWalletHistory() {
         try{
+            List<EWalletHistory> historyList = jdbcTemplate.query(appConfig.getEWalletHistory().getHistoryAllQuery(),
+                                                                  eWalletHistoryMapper);
             return new BaseResponse("Here is the list",
-                    jdbcTemplate.query(appConfig.getEWalletHistory().getHistoryAllQuery(),eWalletHistoryMapper),
+                    historyList.stream().map(this::convertAllEWalletHistory),
                     true,LocalDateTime.now());
         }catch (Exception e){
             return new BaseResponse("Fail to get All history",e.getMessage(),false, LocalDateTime.now());
         }
     }
+    private AllEWalletHistoryResponse convertAllEWalletHistory(EWalletHistory eWalletHistory){
+        Book book = bookService.findBookById(eWalletHistory.getBookId());
+        User user = userService.getUserById(eWalletHistory.getOwnerId());
+        return new AllEWalletHistoryResponse(
+                eWalletHistory.getId(),user.getName(),book.getName(),eWalletHistory.getBeforeBalance(),
+                eWalletHistory.getAfterBalance(),eWalletHistory.getBuyTime(),eWalletHistory.getBuyDate()
+        );
+    }
 
     @Override
     public BaseResponse getEachEWalletHistory() {
         try{
-            Long id = userService.getUserId();
-            List<EWalletHistory> eWalletHistory = jdbcTemplate.query(appConfig.getEWalletHistory().getHistoryQuery(),
-                                                                        new Object[]{id},eWalletHistoryMapper);
-            return new BaseResponse("Here is the data",eWalletHistory, true,LocalDateTime.now());
+            return new BaseResponse("Here is the data",
+                    eWalletHistoryList().stream().map(this::convertHistoryResponse), true,LocalDateTime.now());
         }catch (Exception e){
             return new BaseResponse("Fail to get User's wallet info",e.getMessage(),
                     false, LocalDateTime.now());
+        }
+    }
+    @Override
+    public List<EWalletHistory> eWalletHistoryList(){
+        try{
+            Long id = userService.getUserId();
+            return jdbcTemplate.query(appConfig.getEWalletHistory().getHistoryQuery(),
+                    new Object[]{id},eWalletHistoryMapper);
+        }catch (Exception e){
+            log.error("Error: {}",e.getMessage());
+            return null;
         }
     }
 
     @Override
     public Boolean deleteHistory(Long orderId) {
         try{
-            log.info("OrderId: {}",orderId);
             int result = jdbcTemplate.update(appConfig.getEWalletHistory().getHistoryDeleteQuery(), orderId);
-            log.info("Result: {}",result);
             return result > 0;
         }catch (Exception e){
             log.error("Error: "+e);
@@ -133,12 +152,30 @@ public class EWalletHistoryServiceImpl implements EWalletHistoryService {
     @Override
     public BaseResponse getSpecificEWalletHistory(Long id) {
         try{
-            List<EWalletHistory> eWalletHistories = jdbcTemplate.query(appConfig.getEWalletHistory().getHistoryQuery(),
-                                                                        new Object[]{id},eWalletHistoryMapper);
-            return new BaseResponse("Here is the data",eWalletHistories, true,LocalDateTime.now());
+            List<EWalletHistory> eWalletHistory = jdbcTemplate.query(
+                    appConfig.getEWalletHistory().getHistoryQueryById(), new Object[]{id},eWalletHistoryMapper);
+            if (eWalletHistory.isEmpty()){
+                return new BaseResponse("No history with that id: "+id,null,
+                        false, LocalDateTime.now());
+            }
+            return new BaseResponse("Here is the data",
+                    convertHistoryResponse(eWalletHistory.get(0)), true,LocalDateTime.now());
         }catch (Exception e){
             return new BaseResponse("Fail to get User's wallet info",e.getMessage(),
                     false, LocalDateTime.now());
+        }
+    }
+    @Override
+    public OrderResponse convertHistoryResponse(EWalletHistory eWalletHistory){
+        try{
+            Book book = bookService.findBookById(eWalletHistory.getBookId());
+            return new OrderResponse(
+                    eWalletHistory.getId(),book.getName(),eWalletHistory.getBeforeBalance(),
+                    eWalletHistory.getAfterBalance(),eWalletHistory.getBuyTime(),eWalletHistory.getBuyDate()
+            );
+        }catch (Exception e){
+            log.error("Error: {}",e.getMessage());
+            return null;
         }
     }
 

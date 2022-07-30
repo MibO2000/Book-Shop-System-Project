@@ -9,6 +9,6 @@ public interface UserService {
     BaseResponse createNewUser(UserCreationRequest userCreationRequest);
     Long getUserId();
     User getUserById(Long userId);
-    BaseResponse findUserById(Long userId);
-    BaseResponse deleteUser(Long userId);
+    BaseResponse findUserByName(String name);
+    BaseResponse deleteUser(String name);
 }

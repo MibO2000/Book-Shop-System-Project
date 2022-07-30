@@ -9,6 +9,7 @@ import com.onlineBookShop.bookshopSystem.payLoad.request.OrderBuyingRequest;
 import com.onlineBookShop.bookshopSystem.payLoad.request.OrderDeleteRequest;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BookBuyingResponse;
+import com.onlineBookShop.bookshopSystem.payLoad.response.OrderResponse;
 import com.onlineBookShop.bookshopSystem.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,8 @@ public class BookShopServiceImpl implements BookShopService {
                 date = LocalDate.now();
             }
             List<EWalletHistory> eWalletHistories = eWalletHistoryService.getHistoryByDate(date);
-            return new BaseResponse("Here is the order List", eWalletHistories,
+            return new BaseResponse("Here is the order List",
+                    eWalletHistories.stream().map(eWalletHistoryService::convertHistoryResponse),
                     false, LocalDateTime.now());
         } catch (Exception e) {
             return new BaseResponse("Fail to fetch order list", e.getMessage(),
@@ -111,7 +113,10 @@ public class BookShopServiceImpl implements BookShopService {
                 return new BaseResponse("Fail to get into history table", null,
                         false, LocalDateTime.now());
             }
-            return new BaseResponse("Buy successful", eWalletHistoryService.getEachEWalletHistory().getResult(),
+            List<OrderResponse> orderResponses = eWalletHistoryService.eWalletHistoryList().stream()
+                                                                      .map(eWalletHistoryService::convertHistoryResponse)
+                                                                      .toList();
+            return new BaseResponse("Buy successful", orderResponses ,
                     true, LocalDateTime.now());
         }catch (Exception e){
             log.error("Error: {}",e.getMessage());
@@ -154,14 +159,17 @@ public class BookShopServiceImpl implements BookShopService {
                         return new BaseResponse("Book Count not updated", null,
                                 false, LocalDateTime.now());
                     }
-                    return new BaseResponse("Order deleted", eWalletHistory,
+                    return new BaseResponse("Order deleted",
+                            eWalletHistoryService.convertHistoryResponse(eWalletHistory),
                             true, LocalDateTime.now());
                 }
                 log.error("Fail to add money");
-                return new BaseResponse("Fail to add money", eWalletHistory,
+                return new BaseResponse("Fail to add money",
+                        eWalletHistoryService.convertHistoryResponse(eWalletHistory),
                         false, LocalDateTime.now());
             }
-            return new BaseResponse("Fail to delete order", eWalletHistory,
+            return new BaseResponse("Fail to delete order",
+                    eWalletHistoryService.convertHistoryResponse(eWalletHistory),
                     false, LocalDateTime.now());
         }catch (Exception e){
             return new BaseResponse("Fail in eWalletDeleteResponse", e.getMessage(),
@@ -171,4 +179,5 @@ public class BookShopServiceImpl implements BookShopService {
     private BookBuyingResponse convertBookListResponse(BookBuyable bookBuyable){
         return new BookBuyingResponse(bookBuyable.getBookName(), bookBuyable.getAuthorName(), bookBuyable.getPrice());
     }
+
 }
