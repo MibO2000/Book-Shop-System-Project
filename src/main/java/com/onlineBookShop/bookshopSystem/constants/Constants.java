@@ -7,12 +7,9 @@ public class Constants {
     public static final String ID_FOR_DELETE = "SELECT b.id FROM Book AS b, Author AS a WHERE b.author_id = a.id AND a.id=?1";
     public static final String FIND_BOOK_AVAILABILITY = "SELECT book_count FROM Book AS b WHERE b.book_count>0 AND b.id = ?1 AND b.author_id=?2";
     public static final String GET_PRICE = "SELECT b.price FROM Book AS b WHERE b.id = ?1";
-    public static final String GET_ID_BY_BOOK_NAME="SELECT b.id FROM Book AS b WHERE b.name = ?";
 
     //author repo
     public static final String SORTING_AUTHORS_ASC = "SELECT * FROM Author AS a ORDER BY a.name ASC";
     public static final String SORTING_AUTHORS_DESC = "SELECT * FROM Author AS a ORDER BY a.name DESC";
     public static final String GET_ID_BY_AUTHOR_NAME = "SELECT a.id FROM Author AS a WHERE a.name = ?";
-
-
 }

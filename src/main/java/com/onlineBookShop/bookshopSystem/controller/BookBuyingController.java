@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @RestController
 @Slf4j
 @RequestMapping("bookshop")
+@CrossOrigin
 public class BookBuyingController {
     private final BookShopService bookShopService;
 

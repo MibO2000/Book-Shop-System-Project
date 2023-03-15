@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderBuyingRequest {
+
     private String bookName;
     private String authorName;
 }

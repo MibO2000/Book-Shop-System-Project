@@ -11,6 +11,7 @@ import javax.annotation.security.RolesAllowed;
 
 @RestController
 @RequestMapping("/author")
+@CrossOrigin
 public class AuthorController {
     private final AuthorService authorService;
 

@@ -1,6 +1,5 @@
 package com.onlineBookShop.bookshopSystem.eWallet.controller;
 
-import com.onlineBookShop.bookshopSystem.eWallet.entity.EWalletInfo;
 import com.onlineBookShop.bookshopSystem.eWallet.service.EWalletInfoService;
 import com.onlineBookShop.bookshopSystem.payLoad.request.BalanceUpdateRequest;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;

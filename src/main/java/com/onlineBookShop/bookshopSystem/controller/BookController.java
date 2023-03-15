@@ -1,6 +1,5 @@
 package com.onlineBookShop.bookshopSystem.controller;
 
-import com.onlineBookShop.bookshopSystem.entity.Book;
 import com.onlineBookShop.bookshopSystem.payLoad.request.BookCreateRequest;
 import com.onlineBookShop.bookshopSystem.payLoad.response.BaseResponse;
 import com.onlineBookShop.bookshopSystem.service.BookService;
@@ -11,6 +10,7 @@ import javax.annotation.security.RolesAllowed;
 
 @RestController
 @RequestMapping("/books")
+@CrossOrigin
 public class BookController {
     private final BookService bookService;
 
